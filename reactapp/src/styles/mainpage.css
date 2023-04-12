@@ -1,0 +1,12 @@
+.task-count{
+    width: max-content;
+    padding: 20px;
+    border-radius: 10%;
+    color: #fbfbfb;
+}
+
+.divider{
+    height: 5px;
+    margin-bottom: 5px;
+    border-radius: 20px;
+}

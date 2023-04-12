@@ -1,0 +1,38 @@
+#projnav {
+  background-color: #101322;
+  border-bottom: solid 1px #fbfbfb;
+}
+
+#projnav .navbar-brand {
+  color: white;
+}
+
+#dashboard-nav-tab .nav-link {
+  width: 50px;
+  height: 50px;
+}
+
+#dashboard-nav-tab .nav-link {
+  color: #fbfbfb;
+  border: solid 1px #fbfbfb;
+}
+
+#dashboard-nav-tab .nav-link.active {
+  color: black;
+  background-color: white;
+}
+
+#dashboard-nav-tab .nav-link:hover {
+  color: black;
+  background-color: white;
+}
+
+#nav-tabContent {
+  background-color: #101322;
+}
+
+#infocards div.cardcontainer {
+  border-right: solid 1px white;
+  border-bottom: solid 1px white;
+  color: white;
+}
