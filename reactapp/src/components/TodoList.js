@@ -2,9 +2,67 @@ import "../styles/todolist.css";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import TodoItemCard from "./TodoItemCard";
-
+import { useEffect } from "react";
+import axios from 'axios';
 const TodoList = () => {
-  const [todoList, setTodoList] = useState([1, 2, 3, 4]);
+    const [todoList, setTodoList] = useState([]);
+    const [task, setaTask] = useState("");
+    const [Due, setdue] = useState("");
+    const [selectedtodo, setselectedtodo] = useState("")
+
+    
+    const handleId = (id) => {
+        setselectedtodo(id);
+        console.log("hello",selectedtodo ,"hi")
+    };
+    useEffect(() => {
+        getTodo()
+    }, [])
+    const handleUpdate = (todo) => {
+        setSelectedTour(todo);
+        console.log(todo)
+    };
+    const getTodo = (e) => {
+        axios
+            .get("https://localhost:7288/api/Todoes")
+            .then(response => {
+                console.log('Todo updated successfully', response);
+                setTodoList(response.data);
+                //setTodoList(response.data);
+            })
+            .catch(error => {
+                console.log('Todo update failed', error);
+            });
+    }
+    const updateTodo = (e) => {
+        console.log("hello", selectedtodo,"hi")
+        const data = { task:task, duedate: Due }
+        console.log(data)
+        axios
+            .put(`https://localhost:7288/api/Todoes/${selectedtodo}`, data)
+            .then(response => {
+                console.log('Todo updated successfully', response);
+                setTodoList(response.data);
+                //setTodoList(response.data);
+            })
+            .catch(error => {
+                console.log('Todo update failed', error);
+            });
+    }
+    const deleteTodo = (e) => {
+        console.log("hello", selectedtodo, "hi")
+        
+        axios
+            .delete(`https://localhost:7288/api/Todoes/${selectedtodo}`)
+            .then(response => {
+                console.log('Todo updated successfully', response);
+                setTodoList(response.data);
+                
+            })
+            .catch(error => {
+                console.log('Todo update failed', error);
+            });
+    }
   return (
     <>
       <div className="container pb-5 h-100">
@@ -26,16 +84,20 @@ const TodoList = () => {
                     <div className="card-body">
                       <div className="input-group">
                         <input
-                          id="title"
-                          type="text"
-                          className="form-control form-control-lg"
-                          placeholder="Add to-do item here..."
-                          aria-label="To-do item description"
+                                                  id="title"
+                                                  type="text"
+                                                  className="form-control form-control-lg"
+                                                  placeholder="Add to-do item here..."
+                                                  aria-label="To-do item description"
+                                                  value={task}
+                                                  onChange={(e) => { setaTask(e.target.value) }}
                         />
                         <input
                           id="duedate"
                           type="date"
-                          className="form-control form-control-lg"
+                                                  className="form-control form-control-lg"
+                                                  value={Due}
+                                                  onChange={(e) => { setdue(e.target.value) }}
                         />
                         <button className="btn btn-primary" type="button">
                           Add
@@ -68,10 +130,10 @@ const TodoList = () => {
                     <i className="fas fa-sort-amount-down-alt ms-2"></i>
                   </Link>
                 </div>
-
-                {todoList.map((t) => (
-                  <TodoItemCard key={t} />
-                ))}
+                              
+                              {todoList.map((todo) => (
+                                  <TodoItemCard key={todo.id} todo={todo} handleId={handleId} /> 
+                              ))}
               </div>
             </div>
           </div>
@@ -147,20 +209,22 @@ const TodoList = () => {
                 </div>
               </div>
               <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  data-bs-dismiss="modal"
-                >
-                  Update
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  data-bs-dismiss="modal"
-                >
-                  Cancel
-                </button>
+                              <button
+                                  type="button"
+                                  className="btn btn-primary"
+                                  data-bs-dismiss="modal"
+                                  onClick={handleUpdate} // fixed the syntax error here
+                              >
+                                  Update
+                              </button>
+                              <button
+                                  type="button"
+                                  className="btn btn-secondary"
+                                  data-bs-dismiss="modal"
+                              >
+                                  Cancel
+                              </button>
+
               </div>
             </div>
           </div>

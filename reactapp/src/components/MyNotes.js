@@ -1,9 +1,62 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import "../styles/todolist.css";
 import NoteCard from "./NoteCard";
-
+import axios from "axios"
 const MyNotes = () => {
-  const [notes, setNotes] = useState([1, 2, 3, 4]);
+    const [notes, setNotes] = useState([]);
+    const [title, settitle] = useState("")
+    const [notedata, setnotedata] = useState("")
+    const [selectednote, setselectednote] = useState("")
+    const Datanote = {
+        title: title,
+        data: notedata,
+        employeeId:2
+    }
+    useEffect(() => {
+        getnotes()
+    }, [])
+    const handleId = (id) => {
+        setselectednote(id);
+        console.log("hello", selectednote, "hi")
+    };
+    const getnotes = () => {
+        axios
+            .get("https://localhost:7288/api/Notes")
+            .then(response => {
+                console.log('notes featched', response);
+                setNotes(response.data);
+                //setTodoList(response.data);
+            })
+            .catch(error => {
+                console.log('Todo update failed', error);
+            });
+    }
+    const AddNote = (e) => {
+        console.log(Datanote)
+        axios
+            .post("https://localhost:7288/api/Notes", Datanote)
+            .then(response => {
+                console.log('note added successfully', response);
+                setTodoList(response.data);
+                //setTodoList(response.data);
+            })
+            .catch(error => {
+                console.log('note addtion failed', error);
+            });
+    }
+    const deleteNote = (e) => {
+        console.log(Datanote)
+        axios
+            .delete(`https://localhost:7288/api/Notes/${selectednote}`)
+            .then(response => {
+                console.log('note deleted successfully', response);
+                setTodoList(response.data);
+                //setTodoList(response.data);
+            })
+            .catch(error => {
+                console.log('note addtion failed', error);
+            });
+    }
   return (
     <div className="container pb-5 h-100">
       <div className="row d-flex justify-content-center align-items-center h-100">
@@ -33,9 +86,10 @@ const MyNotes = () => {
               </button>
               <hr className="my-4" />
               <div className="row row-cols-3">
-                {notes.map((n) => (
-                  <NoteCard key={n} />
+                {notes.map((note) => (
+                    <NoteCard key={note.id} note={note} handleId={handleId} />
                 ))}
+                              
               </div>
             </div>
           </div>
@@ -98,10 +152,12 @@ const MyNotes = () => {
                   Title
                 </label>
                 <input
-                  type="text"
-                  className="form-control"
-                  id="title"
-                  placeholder="Weather note"
+                                  type="text"
+                                  className="form-control"
+                                  id="title"
+                                  placeholder="Weather note"
+                                  value={title}
+                                  onChange={(e) => { settitle(e.target.value) }}
                 />
               </div>
               <div className="mb-3">
@@ -111,16 +167,19 @@ const MyNotes = () => {
                 <textarea
                   className="form-control"
                   id="notedata"
-                  rows="3"
+                                  rows="3"
+                                  value={notedata}
+                                  onChange={(e) => { setnotedata(e.target.value) }}
                   placeholder="Today is a wonderful day..."
                 ></textarea>
               </div>
             </div>
             <div className="modal-footer">
               <button
-                type="button"
-                className="btn btn-primary"
-                data-bs-dismiss="modal"
+                              type="button"
+                              className="btn btn-primary"
+                              data-bs-dismiss="modal"
+                              onClick={AddNote}
               >
                 Add
               </button>

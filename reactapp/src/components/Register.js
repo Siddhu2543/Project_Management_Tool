@@ -1,15 +1,73 @@
+import { useState } from "react";
 import { useContext } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { UserContext } from "../App";
 import "../styles/register.css";
 import Logo from "./Logo";
+import axios from 'axios';
 
 const Register = () => {
     const { user, setUser } = useContext(UserContext);
     if (user) {
         return (<Navigate to={"/"} />)
     }
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [mobile,setMobile] = useState("");
+    const [name, setName] = useState("");
+    const [address, setAddress] = useState("");
+    const [dob, setDob] = useState("");
+    const [website, setwebsite] = useState("");
+    const [github, setgithub] = useState("");
+    const [twitter, settwitter] = useState("");
+    const [facebook, setfacebook] = useState("");
+    const [insta, setInsta] = useState("");
+    const handleRegister = (e) => {
+        
+        const data = {
+            email: email,
+            password: password,
+            name: name,
+            mobile: mobile,
+            address: address,
+            dob: dob,
+            website: website,
+            facebook: facebook,
+            instagram: insta,
+            twitter: twitter,
+            github: github
 
+        }
+        console.log(data)
+        e.preventDefault();
+        axios
+            .post("https://localhost:7288/api/Employees", {
+                email: email,
+                password: password,
+                name: name,
+                mobile: mobile,
+                address: address,
+                dob: dob,
+                website: website,
+                facebook: facebook,
+                instagram: insta,
+                twitter: twitter,
+                github: github,
+                image:"demo image"
+
+            }).then(response => {
+               
+                console.log('Request sent successfully', response);
+                console.log(data)
+                // Handle response data or redirect to another page here
+            })
+            .catch(error => {
+                console.log('Request failed', error);
+                // Handle error or show error message to user here
+            });
+            
+           
+    };
   return (
     <section className="vh-100 pb-3">
       <Logo />
@@ -22,8 +80,8 @@ const Register = () => {
               alt="Sample image"
             />
           </div>
-          <div className="col-md-8 col-lg-6 col-xl-4 offset-xl-1 pb-5">
-            <form>
+                  <div className="col-md-8 col-lg-6 col-xl-4 offset-xl-1 pb-5">
+                      <form onSubmit={handleRegister}>
               <div className="d-flex flex-row align-items-center justify-content-center justify-content-lg-start">
                 <p className="lead fw-normal mb-0 me-3">Sign Up with</p>
                 <button
@@ -40,10 +98,12 @@ const Register = () => {
 
               <div className="form-floating mb-3">
                 <input
-                  type="text"
-                  id="name"
-                  className="form-control form-control-lg"
-                  placeholder="John Doe"
+                                  type="text"
+                                  id="name"
+                                  className="form-control form-control-lg"
+                                  placeholder="John Doe"
+                                  value={name}
+                                  onChange={(e) => { setName(e.target.value) }}
                 />
                 <label className="form-label" htmlFor="name">
                   Full Name
@@ -55,7 +115,9 @@ const Register = () => {
                   type="email"
                   id="email"
                   className="form-control form-control-lg"
-                  placeholder="Enter a valid email address"
+                                  placeholder="Enter a valid email address"
+                                  value={email}
+                                  onChange={(e) => { setEmail(e.target.value) }}
                 />
                 <label className="form-label" htmlFor="email">
                   Email address
@@ -71,7 +133,9 @@ const Register = () => {
                     id="mobile"
                     type="tel"
                     className="form-control form-control-lg"
-                    placeholder="Mobile Number"
+                                      placeholder="Mobile Number"
+                                      value={mobile}
+                                      onChange={(e) => { setMobile(e.target.value) }}
                   />
                   <label className="form-label" htmlFor="mobile">
                     Mobile No.
@@ -86,16 +150,20 @@ const Register = () => {
                                   <input
                                       id="dob"
                                       type="date"
-                                      className="form-control form-control-lg"
+                                  className="form-control form-control-lg"
+                                  value={dob}
+                                  onChange={(e) => { setDob(e.target.value) }}
                                   />
                           </div>
 
-              <div className="form-floating mb-3">
-                <textarea
+                          <div className="form-floating mb-3">
+                              <input
                                   id="address"
                                   className="form-control form-control-lg"
                                   placeholder="Address goes here..."
-                                  rows={3 }
+                                  rows={3}
+                                  value={address}
+                                  onChange={(e) => { setAddress(e.target.value) }}
                 />
                 <label className="form-label" htmlFor="address">
                   Resident Address
@@ -107,7 +175,9 @@ const Register = () => {
                   type="password"
                   id="password"
                   className="form-control form-control-lg"
-                  placeholder="Enter password"
+                                  placeholder="Enter password"
+                                  value={password}
+                                  onChange={(e) => { setPassword(e.target.value) }}
                 />
                 <label className="form-label" htmlFor="password">
                   Password
@@ -139,9 +209,10 @@ const Register = () => {
 
               <div className="text-center text-lg-start pt-2">
                 <button
-                  type="button"
-                  className="btn btn-primary btn-lg"
-                  style={{ paddingLeft: "2.5rem", paddingRight: "2.5rem" }}
+                                  type="button"
+                                  className="btn btn-primary btn-lg"
+                                  style={{ paddingLeft: "2.5rem", paddingRight: "2.5rem" }}
+                                  onClick={handleRegister}
                 >
                   Register
                 </button>

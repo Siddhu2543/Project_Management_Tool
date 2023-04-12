@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace webapi.Models
 {
@@ -11,7 +12,9 @@ namespace webapi.Models
         public string Description { get; set; }
         public DateTime CreationDate { get; set; } = DateTime.Now;
         [Required]
+        [JsonIgnore]
         public int EmployeeId { get; set; }
+        [JsonIgnore]
         public Employee Employee { get; set; }
     }
 }

@@ -62,12 +62,29 @@ namespace webapi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutEmployee(int id, Employee employee)
         {
+            var previous = await _context.Employees.FindAsync(id);
+
             if (id != employee.Id)
             {
                 return BadRequest();
             }
-
-            _context.Entry(employee).State = EntityState.Modified;
+            Employee emp=new Employee()
+            {
+                Id = employee.Id,
+                Name = employee.Name,
+                Password=previous.Password,
+                Image= employee.Image,
+                GitHub= employee.GitHub,
+                Website= employee.Website,
+                Facebook= employee.Facebook,
+                Twitter = employee.Twitter,
+                Email=previous.Email,
+                Instagram= employee.Instagram,
+                Mobile= employee.Mobile,
+                Dob= employee.Dob,
+                Address = employee.Address,
+            };
+            _context.Entry(emp).State = EntityState.Modified;
 
             try
             {

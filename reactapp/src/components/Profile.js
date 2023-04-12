@@ -1,5 +1,80 @@
+import { useContext, useEffect, useState } from "react";
+import { UserContext } from "../App";
+import axios from "axios"
 const Profile = () => {
-  return (
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [mobile, setMobile] = useState("");
+    const [name, setName] = useState("");
+    const [address, setAddress] = useState("");
+    const [dob, setDob] = useState("");
+    const [website, setwebsite] = useState("");
+    const [github, setgithub] = useState("");
+    const [twitter, settwitter] = useState("");
+    const [facebook, setfacebook] = useState("");
+    const [insta, setInsta] = useState("");
+    const [employee, setEmployee] = useState("")
+    const updateUser = (e) => {
+
+        const data = {
+            email: email,
+            password: password,
+            name: name,
+            mobile: mobile,
+            address: address,
+            dob: dob,
+            website: website,
+            facebook: facebook,
+            instagram: insta,
+            twitter: twitter,
+            github: github
+
+        }
+        console.log(data)
+        e.preventDefault();
+        axios
+            .put("https://localhost:7288/api/Employees/2", {
+                email: "emai",
+                password: "password",
+                name: name,
+                mobile: mobile,
+                address: address,
+                dob: dob,
+                website: website,
+                facebook: facebook,
+                instagram: insta,
+                twitter: twitter,
+                github: github,
+                image: "demo image"
+
+            }).then(response => {
+
+                console.log('Request sent successfully', response);
+                console.log(data)
+                // Handle response data or redirect to another page here
+            })
+            .catch(error => {
+                console.log('Request failed', error);
+                // Handle error or show error message to user here
+            });
+    }
+    const getUser = () => {
+        axios
+            .get('https://localhost:7288/api/Employees/2')
+            .then(response => {
+                console.log('user fetch successfully', response.data);
+                setEmployee(response.data);
+                
+                
+            })
+            .catch(error => {
+                console.log('user fetch failed', error);
+                // Handle error or show error message to user here
+            });
+    };
+       
+    useEffect(() => { getUser() }, [])
+return(
     <>
       <section style={{ backgroundColor: "#eee" }} className="mb-3">
         <div className="container py-3">
@@ -26,8 +101,8 @@ const Profile = () => {
                     alt="avatar"
                     className="rounded-circle img-fluid"
                     style={{ width: "150px" }}
-                  />
-                  <h5 className="my-3">John Smith</h5>
+                                />
+                                <h5 className="my-3">{employee.name}</h5>
                   <p className="text-muted mb-1">Full Stack Developer</p>
                   <p className="text-muted mb-4">Bay Area, San Francisco, CA</p>
                   <div className="d-flex justify-content-center mb-2">
@@ -46,36 +121,36 @@ const Profile = () => {
                 <div className="card-body p-0">
                   <ul className="list-group list-group-flush rounded-3">
                     <li className="list-group-item d-flex justify-content-between align-items-center p-3">
-                      <i className="fas fa-globe fa-lg text-warning"></i>
-                      <p className="mb-0">Your Website</p>
+                                        <i className="fas fa-globe fa-lg text-warning"></i>
+                                        <p className="mb-0">{employee.website}</p>
                     </li>
                     <li className="list-group-item d-flex justify-content-between align-items-center p-3">
                       <i
                         className="fab fa-github fa-lg"
                         style={{ color: "#333333" }}
-                      ></i>
-                      <p className="mb-0">https://github.com/Siddhu2543</p>
+                                        ></i>
+                                        <p className="mb-0">{employee.github}</p>
                     </li>
                     <li className="list-group-item d-flex justify-content-between align-items-center p-3">
                       <i
                         className="fab fa-twitter fa-lg"
                         style={{ color: "#55acee" }}
-                      ></i>
-                      <p className="mb-0">https://twitter.com</p>
+                                        ></i>
+                                        <p className="mb-0">{employee.twitter}</p>
                     </li>
                     <li className="list-group-item d-flex justify-content-between align-items-center p-3">
                       <i
                         className="fab fa-instagram fa-lg"
                         style={{ color: "#ac2bac" }}
-                      ></i>
-                      <p className="mb-0">https://instagram.com</p>
+                                        ></i>
+                                        <p className="mb-0">{employee.insta}</p>
                     </li>
                     <li className="list-group-item d-flex justify-content-between align-items-center p-3">
                       <i
                         className="fab fa-facebook-f fa-lg"
                         style={{ color: "#3b5998" }}
-                      ></i>
-                      <p className="mb-0">https://facebook.com</p>
+                                        ></i>
+                                        <p className="mb-0">{employee.facebook}</p>
                     </li>
                   </ul>
                 </div>
@@ -89,7 +164,7 @@ const Profile = () => {
                       <p className="mb-0">Full Name</p>
                     </div>
                     <div className="col-sm-9">
-                      <p className="text-muted mb-0">Johnatan Smith</p>
+                                        <p className="text-muted mb-0">{employee.name}</p>
                     </div>
                   </div>
                   <hr />
@@ -97,8 +172,8 @@ const Profile = () => {
                     <div className="col-sm-3">
                       <p className="mb-0">Email</p>
                     </div>
-                    <div className="col-sm-9">
-                      <p className="text-muted mb-0">example@example.com</p>
+                                    <div className="col-sm-9">
+                                        <p className="text-muted mb-0">{employee.email}</p>
                     </div>
                   </div>
                   <hr />
@@ -106,8 +181,8 @@ const Profile = () => {
                     <div className="col-sm-3">
                       <p className="mb-0">Mobile</p>
                     </div>
-                    <div className="col-sm-9">
-                      <p className="text-muted mb-0">(097) 234-5678</p>
+                                    <div className="col-sm-9">
+                                        <p className="text-muted mb-0">{employee.mobile}</p>
                     </div>
                   </div>
                   <hr />
@@ -115,8 +190,8 @@ const Profile = () => {
                     <div className="col-sm-3">
                       <p className="mb-0">Date of Birth</p>
                     </div>
-                    <div className="col-sm-9">
-                      <p className="text-muted mb-0">01/01/2000</p>
+                                    <div className="col-sm-9">
+                                        <p className="text-muted mb-0">{employee.dob}</p>
                     </div>
                   </div>
                   <hr />
@@ -125,8 +200,8 @@ const Profile = () => {
                       <p className="mb-0">Address</p>
                     </div>
                     <div className="col-sm-9">
-                      <p className="text-muted mb-0">
-                        Bay Area, San Francisco, CA
+                                        <p className="text-muted mb-0">
+                                            {employee.address}
                       </p>
                     </div>
                   </div>
@@ -344,10 +419,12 @@ const Profile = () => {
                   Full Name
                 </label>
                 <input
-                  type="text"
-                  className="form-control"
-                  id="name"
-                  placeholder="Full Name"
+                                  type="text"
+                                  className="form-control"
+                                  id="name"
+                                  placeholder="Full Name"
+                                  value={name}
+                                  onChange={(e) => { setName(e.target.value) }}
                 />
               </div>
               <div className="mb-3">
@@ -358,7 +435,9 @@ const Profile = () => {
                   type="tel"
                   className="form-control"
                   id="phone"
-                  placeholder="+91 99999 88888"
+                                  placeholder="+91 99999 88888"
+                                  value={mobile}
+                                  onChange={(e) => { setMobile(e.target.value) }}
                 />
               </div>
               <div className="mb-3">
@@ -369,19 +448,23 @@ const Profile = () => {
                   type="date"
                   className="form-control"
                   id="dob"
-                  placeholder="+91 99999 88888"
+                                  placeholder="+91 99999 88888"
+                                  value={dob}
+                                  onChange={(e) => { setDob(e.target.value) }}
                 />
               </div>
               <div className="mb-3">
                 <label htmlFor="address" className="form-label">
                   Address
-                </label>
-                <textarea
+                            </label>
+                            <textarea
                   className="form-control"
                   id="address"
-                  rows="3"
-                  placeholder="Address goes here..."
-                ></textarea>
+                                rows="3"
+                                onChange={(e) => { setAddress(e.target.value) }}
+                                  value={address}
+                                  placeholder="Address goes here..."
+                              ></textarea>
               </div>
               <div className="mb-3">
                 <label htmlFor="profilepic" className="form-label">
@@ -404,7 +487,9 @@ const Profile = () => {
                   type="url"
                   className="form-control"
                   id="website"
-                  placeholder="https://yourwebsite.com"
+                                  placeholder="https://yourwebsite.com"
+                                  value={website}
+                                  onChange={(e) => { setwebsite(e.target.value) }}
                 />
               </div>
               <div className="mb-3">
@@ -415,7 +500,9 @@ const Profile = () => {
                   type="url"
                   className="form-control"
                   id="github"
-                  placeholder="https://github.com/Siddhu2543"
+                                  placeholder="https://github.com"
+                                  value={github}
+                                  onChange={(e) => { setgithub(e.target.value) }}
                 />
               </div>
               <div className="mb-3">
@@ -426,7 +513,9 @@ const Profile = () => {
                   type="url"
                   className="form-control"
                   id="twitter"
-                  placeholder="https://twitter.com/YourAccount"
+                                  placeholder="https://twitter.com/YourAccount"
+                                  value={twitter}
+                                  onChange={(e) => { settwitter(e.target.value) }}
                 />
               </div>
               <div className="mb-3">
@@ -437,7 +526,9 @@ const Profile = () => {
                   type="url"
                   className="form-control"
                   id="instagram"
-                  placeholder="https://instagram.com"
+                                  placeholder="https://instagram.com"
+                                  value={insta}
+                                  onChange={(e) => { setInsta(e.target.value) }}
                 />
               </div>
               <div className="mb-3">
@@ -447,16 +538,19 @@ const Profile = () => {
                 <input
                   type="url"
                   className="form-control"
-                  id="facebook"
+                                  id="facebook"
+                                  value={facebook}
+                                  onChange={(e) => { setfacebook(e.target.value) }}
                   placeholder="https://facebook.com/"
                 />
               </div>
             </div>
             <div className="modal-footer">
               <button
-                type="button"
-                className="btn btn-primary"
-                data-bs-dismiss="modal"
+                              type="button"
+                              className="btn btn-primary"
+                              data-bs-dismiss="modal"
+                              onClick={updateUser}
               >
                 Update
               </button>
