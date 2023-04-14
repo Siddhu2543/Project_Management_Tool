@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace webapi.Models
 {
@@ -13,9 +14,11 @@ namespace webapi.Models
         public string Tasks { get; set; }
         [Required]
         public int TeamId { get; set; }
+        [JsonIgnore]
         public Team Team { get; set; }
         [Required]
         public int PhaseId { get; set; }
+        [JsonIgnore]
         public Phase Phase { get; set; }
         [Required]
         public DateTime StartDate { get; set; }

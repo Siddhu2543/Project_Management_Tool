@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace webapi.Models
 {
@@ -11,8 +12,11 @@ namespace webapi.Models
         public string Description { get; set; }
         [Required]
         public int ProjectId { get; set; }
+        [JsonIgnore]
         public Project Project { get; set; }
+        [JsonIgnore]
         public ICollection<Employee> Employees { get; set; } = new List<Employee>();
+        [JsonIgnore]
         public ICollection<PTask> PTasks { get; set; } = new List<PTask>();
     }
 }

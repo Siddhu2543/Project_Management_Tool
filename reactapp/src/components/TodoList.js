@@ -1,68 +1,66 @@
 import "../styles/todolist.css";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TodoItemCard from "./TodoItemCard";
-import { useEffect } from "react";
-import axios from 'axios';
-const TodoList = () => {
-    const [todoList, setTodoList] = useState([]);
-    const [task, setaTask] = useState("");
-    const [Due, setdue] = useState("");
-    const [selectedtodo, setselectedtodo] = useState("")
+import axios from "axios";
 
-    
-    const handleId = (id) => {
-        setselectedtodo(id);
-        console.log("hello",selectedtodo ,"hi")
+const TodoList = () => {
+  const [todoList, setTodoList] = useState([]);
+  const [title, setTitle] = useState("");
+  const [duedate, setDuedate] = useState("");
+
+  useEffect(() => {
+    const token = JSON.parse(localStorage.getItem("USER"));
+    const config = {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
     };
-    useEffect(() => {
-        getTodo()
-    }, [])
-    const handleUpdate = (todo) => {
-        setSelectedTour(todo);
-        console.log(todo)
+    axios
+      .get("https://localhost:7288/api/Todoes/Employee", config)
+      .then((res) => {
+        setTodoList(res.data);
+      });
+  }, []);
+
+  useEffect(() => {}, [todoList]);
+
+  const handleTitleChange = (e) => {
+    setTitle(e.target.value);
+  };
+
+  const handleDueDateChange = (e) => {
+    setDuedate(e.target.value);
+  };
+
+  const handleAddClick = () => {
+    const token = JSON.parse(localStorage.getItem("USER"));
+    const config = {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
     };
-    const getTodo = (e) => {
+    axios
+      .post(
+        "https://localhost:7288/api/Todoes",
+        {
+          title: title,
+          duedate: duedate,
+        },
+        config
+      )
+      .then((res) => {
+        console.log(res.data);
         axios
-            .get("https://localhost:7288/api/Todoes")
-            .then(response => {
-                console.log('Todo updated successfully', response);
-                setTodoList(response.data);
-                //setTodoList(response.data);
-            })
-            .catch(error => {
-                console.log('Todo update failed', error);
-            });
-    }
-    const updateTodo = (e) => {
-        console.log("hello", selectedtodo,"hi")
-        const data = { task:task, duedate: Due }
-        console.log(data)
-        axios
-            .put(`https://localhost:7288/api/Todoes/${selectedtodo}`, data)
-            .then(response => {
-                console.log('Todo updated successfully', response);
-                setTodoList(response.data);
-                //setTodoList(response.data);
-            })
-            .catch(error => {
-                console.log('Todo update failed', error);
-            });
-    }
-    const deleteTodo = (e) => {
-        console.log("hello", selectedtodo, "hi")
-        
-        axios
-            .delete(`https://localhost:7288/api/Todoes/${selectedtodo}`)
-            .then(response => {
-                console.log('Todo updated successfully', response);
-                setTodoList(response.data);
-                
-            })
-            .catch(error => {
-                console.log('Todo update failed', error);
-            });
-    }
+          .get("https://localhost:7288/api/Todoes/Employee", config)
+          .then((res) => {
+            setTodoList(res.data);
+          });
+      });
+    setDuedate("");
+    setTitle("");
+  };
+
   return (
     <>
       <div className="container pb-5 h-100">
@@ -84,22 +82,26 @@ const TodoList = () => {
                     <div className="card-body">
                       <div className="input-group">
                         <input
-                                                  id="title"
-                                                  type="text"
-                                                  className="form-control form-control-lg"
-                                                  placeholder="Add to-do item here..."
-                                                  aria-label="To-do item description"
-                                                  value={task}
-                                                  onChange={(e) => { setaTask(e.target.value) }}
+                          id="title"
+                          type="text"
+                          className="form-control form-control-lg"
+                          placeholder="Add to-do item here..."
+                          aria-label="To-do item description"
+                          value={title}
+                          onChange={handleTitleChange}
                         />
                         <input
                           id="duedate"
                           type="date"
-                                                  className="form-control form-control-lg"
-                                                  value={Due}
-                                                  onChange={(e) => { setdue(e.target.value) }}
+                          className="form-control form-control-lg"
+                          value={duedate}
+                          onChange={handleDueDateChange}
                         />
-                        <button className="btn btn-primary" type="button">
+                        <button
+                          className="btn btn-primary"
+                          type="button"
+                          onClick={handleAddClick}
+                        >
                           Add
                         </button>
                       </div>
@@ -130,101 +132,10 @@ const TodoList = () => {
                     <i className="fas fa-sort-amount-down-alt ms-2"></i>
                   </Link>
                 </div>
-                              
-                              {todoList.map((todo) => (
-                                  <TodoItemCard key={todo.id} todo={todo} handleId={handleId} /> 
-                              ))}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          className="modal fade"
-          id="cnfrmdelete"
-          data-bs-backdrop="static"
-          data-bs-keyboard="false"
-          tabIndex="-1"
-          aria-labelledby="staticBackdropLabel"
-          aria-hidden="true"
-        >
-          <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h1 className="modal-title fs-5" id="staticBackdropLabel">
-                  Are you sure you want to delete this Todo Item?
-                </h1>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  data-bs-dismiss="modal"
-                >
-                  Yes
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  data-bs-dismiss="modal"
-                >
-                  No
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          className="modal fade"
-          id="edittodo"
-          data-bs-backdrop="static"
-          data-bs-keyboard="false"
-          tabIndex="-1"
-          aria-labelledby="staticBackdropLabel"
-          aria-hidden="true"
-        >
-          <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h1 className="modal-title fs-5" id="staticBackdropLabel">
-                  Update Todo Item
-                </h1>
-              </div>
-              <div className="modal-body">
-                <div className="mb-3">
-                  <label htmlFor="task" className="form-label">
-                    Task
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="task"
-                    placeholder="Task goes here..."
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="duedate" className="form-label">
-                    Due Date
-                  </label>
-                  <input type={"date"} className="form-control" id="duedate" />
-                </div>
-              </div>
-              <div className="modal-footer">
-                              <button
-                                  type="button"
-                                  className="btn btn-primary"
-                                  data-bs-dismiss="modal"
-                                  onClick={handleUpdate} // fixed the syntax error here
-                              >
-                                  Update
-                              </button>
-                              <button
-                                  type="button"
-                                  className="btn btn-secondary"
-                                  data-bs-dismiss="modal"
-                              >
-                                  Cancel
-                              </button>
 
+                {todoList?.map((t, i) => (
+                  <TodoItemCard todo={t} setTodoList={setTodoList} key={i} />
+                ))}
               </div>
             </div>
           </div>

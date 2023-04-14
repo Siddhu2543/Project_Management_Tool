@@ -14,6 +14,7 @@ namespace webapi.Controllers
     {
         private readonly IAmazonS3 _s3Client;
         private readonly IConfiguration _configuration;
+        private readonly string bucketName = "projectmanagementtool";
 
         public FilesController(IAmazonS3 s3Client, IConfiguration config)
         {
@@ -22,28 +23,34 @@ namespace webapi.Controllers
         }
 
         [HttpPost("upload")]
-        public async Task<IActionResult> UploadFileAsync(IFormFile file)
+        public async Task<ActionResult<string>> UploadFileAsync([FromForm] FileModel file)
         {
-                using (var newMemoryStream = new MemoryStream())
-                {
-                    file.CopyTo(newMemoryStream);
-
+            using (var newMemoryStream = new MemoryStream())
+            {
+                try {
+                    file.FormFile.CopyTo(newMemoryStream);
+                    var key = DateTime.Now.ToFileTime() + file.FormFile.FileName;
                     var uploadRequest = new TransferUtilityUploadRequest
                     {
                         InputStream = newMemoryStream,
-                        Key = file.FileName,
+                        Key = key,
                         BucketName = "projectmanagementtool",
                         CannedACL = S3CannedACL.PublicRead
                     };
 
                     var fileTransferUtility = new TransferUtility(_s3Client);
                     await fileTransferUtility.UploadAsync(uploadRequest);
+                    return Ok(key);
+                }catch(Exception e)
+                {
+                    Console.WriteLine(e);
+                    return BadRequest(e.Message);
                 }
-            return Ok("File Uploaded Successfully");
+            }
         }
 
         [HttpGet("get-all")]
-        public async Task<IActionResult> GetAllFilesAsync(string bucketName, string? prefix)
+        public async Task<IActionResult> GetAllFilesAsync(string? prefix)
         {
             var bucketExists = await _s3Client.DoesS3BucketExistAsync(bucketName);
             if (!bucketExists) return NotFound($"Bucket {bucketName} does not exist.");
@@ -70,11 +77,9 @@ namespace webapi.Controllers
             return Ok(s3Objects);
         }
 
-        [HttpGet("get-by-key")]
-        public async Task<IActionResult> GetFileByKeyAsync(string bucketName, string key)
+        [HttpGet("get-by-key/{key}")]
+        public async Task<IActionResult> GetFileByKeyAsync(string key)
         {
-            var bucketExists = await _s3Client.DoesS3BucketExistAsync(bucketName);
-            if (!bucketExists) return NotFound($"Bucket {bucketName} does not exist.");
             var s3Object = await _s3Client.GetObjectAsync(bucketName, key);
             return File(s3Object.ResponseStream, s3Object.Headers.ContentType);
         }

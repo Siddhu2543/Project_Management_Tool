@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace webapi.Models
 {
@@ -19,9 +20,11 @@ namespace webapi.Models
         public string Image { get; set; }
         [Required]
         public int CreatorId { get; set; }
+        [JsonIgnore]
         public Employee Creator { get; set; }
         public bool IsChatCreated { get; set; } = false;
         public int? ChatId { get; set; } = null;
+        [JsonIgnore]
         public Chat? Chat { get; set; } = null;
         public ICollection<Phase> Phases { get; set; } = new List<Phase>();
         public ICollection<Team> Teams { get; set; } = new List<Team>();

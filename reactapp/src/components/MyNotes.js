@@ -1,62 +1,25 @@
-import { useState,useEffect } from "react";
+import { useEffect, useState } from "react";
 import "../styles/todolist.css";
 import NoteCard from "./NoteCard";
-import axios from "axios"
+import AddNoteModal from "./AddNoteModal";
+import axios from "axios";
+
 const MyNotes = () => {
-    const [notes, setNotes] = useState([]);
-    const [title, settitle] = useState("")
-    const [notedata, setnotedata] = useState("")
-    const [selectednote, setselectednote] = useState("")
-    const Datanote = {
-        title: title,
-        data: notedata,
-        employeeId:2
-    }
-    useEffect(() => {
-        getnotes()
-    }, [])
-    const handleId = (id) => {
-        setselectednote(id);
-        console.log("hello", selectednote, "hi")
+  const [notes, setNotes] = useState();
+  useEffect(() => {
+    const token = JSON.parse(localStorage.getItem("USER"));
+    const config = {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
     };
-    const getnotes = () => {
-        axios
-            .get("https://localhost:7288/api/Notes")
-            .then(response => {
-                console.log('notes featched', response);
-                setNotes(response.data);
-                //setTodoList(response.data);
-            })
-            .catch(error => {
-                console.log('Todo update failed', error);
-            });
-    }
-    const AddNote = (e) => {
-        console.log(Datanote)
-        axios
-            .post("https://localhost:7288/api/Notes", Datanote)
-            .then(response => {
-                console.log('note added successfully', response);
-                setTodoList(response.data);
-                //setTodoList(response.data);
-            })
-            .catch(error => {
-                console.log('note addtion failed', error);
-            });
-    }
-    const deleteNote = (e) => {
-        console.log(Datanote)
-        axios
-            .delete(`https://localhost:7288/api/Notes/${selectednote}`)
-            .then(response => {
-                console.log('note deleted successfully', response);
-                setTodoList(response.data);
-                //setTodoList(response.data);
-            })
-            .catch(error => {
-                console.log('note addtion failed', error);
-            });
-    }
+    axios
+      .get("https://localhost:7288/api/Notes/Employee", config)
+      .then((res) => {
+        setNotes(res.data);
+      });
+  }, []);
+
   return (
     <div className="container pb-5 h-100">
       <div className="row d-flex justify-content-center align-items-center h-100">
@@ -77,6 +40,7 @@ const MyNotes = () => {
               </div>
               <hr className="my-4" />
               <button
+                type="button"
                 className="btn btn-primary"
                 data-bs-toggle={"modal"}
                 data-bs-target={"#addnote"}
@@ -86,114 +50,15 @@ const MyNotes = () => {
               </button>
               <hr className="my-4" />
               <div className="row row-cols-3">
-                {notes.map((note) => (
-                    <NoteCard key={note.id} note={note} handleId={handleId} />
+                {notes?.map((n, i) => (
+                  <NoteCard key={i} note={n} setNotes={setNotes} />
                 ))}
-                              
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div
-        className="modal fade"
-        id="cnfrmdeletenote"
-        data-bs-backdrop="static"
-        data-bs-keyboard="false"
-        tabIndex="-1"
-        aria-labelledby="staticBackdropLabel"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h1 className="modal-title fs-5" id="staticBackdropLabel">
-                Are you sure you want to delete this note?
-              </h1>
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-primary"
-                data-bs-dismiss="modal"
-              >
-                Yes
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                data-bs-dismiss="modal"
-              >
-                No
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="modal fade"
-        id="addnote"
-        data-bs-backdrop="static"
-        data-bs-keyboard="false"
-        tabIndex="-1"
-        aria-labelledby="staticBackdropLabel"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h1 className="modal-title fs-5" id="staticBackdropLabel">
-                Add New Note
-              </h1>
-            </div>
-            <div className="modal-body">
-              <div className="mb-3">
-                <label htmlFor="task" className="form-label">
-                  Title
-                </label>
-                <input
-                                  type="text"
-                                  className="form-control"
-                                  id="title"
-                                  placeholder="Weather note"
-                                  value={title}
-                                  onChange={(e) => { settitle(e.target.value) }}
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="duedate" className="form-label">
-                  Note Data
-                </label>
-                <textarea
-                  className="form-control"
-                  id="notedata"
-                                  rows="3"
-                                  value={notedata}
-                                  onChange={(e) => { setnotedata(e.target.value) }}
-                  placeholder="Today is a wonderful day..."
-                ></textarea>
-              </div>
-            </div>
-            <div className="modal-footer">
-              <button
-                              type="button"
-                              className="btn btn-primary"
-                              data-bs-dismiss="modal"
-                              onClick={AddNote}
-              >
-                Add
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                data-bs-dismiss="modal"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <AddNoteModal setNotes={setNotes} />
     </div>
   );
 };

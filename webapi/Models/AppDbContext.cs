@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
-using System.Text.Json;
+
 namespace webapi.Models
 {
     public class AppDbContext : DbContext
@@ -36,6 +35,5 @@ namespace webapi.Models
             modelBuilder.Entity<Employee>().HasMany(e => e.Chats).WithMany(c => c.Employees);
             modelBuilder.Entity<Chat>().HasMany(c => c.Messages).WithOne(m => m.Chat).HasForeignKey(m => m.ChatId);
         }
-      
     }
 }

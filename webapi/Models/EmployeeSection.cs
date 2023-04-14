@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace webapi.Models
 {
@@ -14,6 +15,7 @@ namespace webapi.Models
         public bool IsRead { get; set; } = false;
         [Required]
         public int ProjectId { get; set; }
+        [JsonIgnore]
         public Project Project { get; set; }
     }
 }

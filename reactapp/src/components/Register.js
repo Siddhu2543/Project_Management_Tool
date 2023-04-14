@@ -1,75 +1,109 @@
-import { useState } from "react";
-import { useContext } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { UserContext } from "../App";
 import "../styles/register.css";
 import Logo from "./Logo";
-import axios from 'axios';
+import { useContext, useState } from "react";
+import { UserContext } from "../App";
+import axios from "axios";
+import Loading from "./Loading";
 
 const Register = () => {
-    const { user, setUser } = useContext(UserContext);
-    if (user) {
-        return (<Navigate to={"/"} />)
+  const { user, setUser } = useContext(UserContext);
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [address, setAddress] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [dob, setDob] = useState("");
+  const [password, setPassword] = useState("");
+  const [cpassword, setCpassword] = useState("");
+  const [fileName, setFileName] = useState();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(false);
+
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+  };
+  const handleNameChange = (e) => {
+    setName(e.target.value);
+  };
+  const handleAddressChange = (e) => {
+    setAddress(e.target.value);
+  };
+  const handleMobileChange = (e) => {
+    setMobile(e.target.value);
+  };
+  const handleDobChange = (e) => {
+    setDob(e.target.value);
+  };
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+  };
+  const handleCpasswordChange = (e) => {
+    setCpassword(e.target.value);
+  };
+
+  const handleFileChange = (e) => {
+    setFileName(e.target.files[0]);
+  };
+
+  const handleRegisterClick = (e) => {
+    e.preventDefault();
+    if (password != cpassword) {
+      alert("Password does not match Confirm Password!");
+      return;
     }
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [mobile,setMobile] = useState("");
-    const [name, setName] = useState("");
-    const [address, setAddress] = useState("");
-    const [dob, setDob] = useState("");
-    const [website, setwebsite] = useState("");
-    const [github, setgithub] = useState("");
-    const [twitter, settwitter] = useState("");
-    const [facebook, setfacebook] = useState("");
-    const [insta, setInsta] = useState("");
-    const handleRegister = (e) => {
-        
-        const data = {
-            email: email,
-            password: password,
-            name: name,
-            mobile: mobile,
-            address: address,
-            dob: dob,
-            website: website,
-            facebook: facebook,
-            instagram: insta,
-            twitter: twitter,
-            github: github
-
-        }
-        console.log(data)
-        e.preventDefault();
-        axios
-            .post("https://localhost:7288/api/Employees", {
-                email: email,
-                password: password,
-                name: name,
-                mobile: mobile,
-                address: address,
-                dob: dob,
-                website: website,
-                facebook: facebook,
-                instagram: insta,
-                twitter: twitter,
-                github: github,
-                image:"demo image"
-
-            }).then(response => {
-               
-                console.log('Request sent successfully', response);
-                console.log(data)
-                // Handle response data or redirect to another page here
+    setIsLoading(true);
+    axios
+      .get(`https://localhost:7288/api/Employees/DoesEmailExist/${email}`)
+      .then((res) => {
+        if (res.data) {
+          alert(
+            `${email} is already in use! Try registering with different Email Id!`
+          );
+          setIsLoading(false);
+        } else {
+          const formData = new FormData();
+          formData.append("fileName", fileName.name);
+          formData.append("formFile", fileName);
+          axios
+            .post("https://localhost:7288/api/Files/upload", formData)
+            .then((res) => {
+              const key = res.data;
+              axios
+                .post("https://localhost:7288/api/Employees", {
+                  name: name,
+                  email: email,
+                  mobile: mobile,
+                  dob: dob,
+                  password: password,
+                  image: key,
+                  address: address,
+                })
+                .then((res) => {
+                  const employee = res.data;
+                  setIsRegistered(true);
+                });
             })
-            .catch(error => {
-                console.log('Request failed', error);
-                // Handle error or show error message to user here
+            .finally(() => {
+              setIsLoading(false);
             });
-            
-           
-    };
+        }
+      })
+      .catch((res) => {
+        console.log(res);
+      });
+  };
+
+  if (user) {
+    return <Navigate to={"/"} />;
+  }
+  if (isLoading) {
+    return <Loading />;
+  }
+  if (isRegistered) {
+    return <Navigate to={"/login"} />;
+  }
   return (
-    <section className="vh-100 pb-3">
+    <section className="vh-100">
       <Logo />
       <div className="container-fluid h-custom">
         <div className="row d-flex justify-content-center align-items-center h-100">
@@ -80,8 +114,11 @@ const Register = () => {
               alt="Sample image"
             />
           </div>
-                  <div className="col-md-8 col-lg-6 col-xl-4 offset-xl-1 pb-5">
-                      <form onSubmit={handleRegister}>
+          <div className="col-md-8 col-lg-6 col-xl-4 offset-xl-1 pb-5">
+            <form
+              onSubmit={handleRegisterClick}
+              encType={"multipart/form-data"}
+            >
               <div className="d-flex flex-row align-items-center justify-content-center justify-content-lg-start">
                 <p className="lead fw-normal mb-0 me-3">Sign Up with</p>
                 <button
@@ -98,12 +135,13 @@ const Register = () => {
 
               <div className="form-floating mb-3">
                 <input
-                                  type="text"
-                                  id="name"
-                                  className="form-control form-control-lg"
-                                  placeholder="John Doe"
-                                  value={name}
-                                  onChange={(e) => { setName(e.target.value) }}
+                  type="text"
+                  id="name"
+                  className="form-control form-control-lg"
+                  placeholder="John Doe"
+                  required
+                  value={name}
+                  onChange={handleNameChange}
                 />
                 <label className="form-label" htmlFor="name">
                   Full Name
@@ -115,55 +153,63 @@ const Register = () => {
                   type="email"
                   id="email"
                   className="form-control form-control-lg"
-                                  placeholder="Enter a valid email address"
-                                  value={email}
-                                  onChange={(e) => { setEmail(e.target.value) }}
+                  placeholder="Enter a valid email address"
+                  required
+                  value={email}
+                  onChange={handleEmailChange}
                 />
                 <label className="form-label" htmlFor="email">
                   Email address
                 </label>
               </div>
 
-            <div className="input-group mb-3">
-                <span className="input-group-text" id="country-code">
+              <div className="form-outline mb-3">
+                <div className="input-group">
+                  <span className="input-group-text" id="country-code">
                     +91
-                </span>
-                <div className="form-floating">
-                  <input
-                    id="mobile"
-                    type="tel"
-                    className="form-control form-control-lg"
-                                      placeholder="Mobile Number"
-                                      value={mobile}
-                                      onChange={(e) => { setMobile(e.target.value) }}
-                  />
-                  <label className="form-label" htmlFor="mobile">
-                    Mobile No.
-                  </label>
+                  </span>
+                  <div className="form-floating">
+                    <input
+                      id="mobile"
+                      type="tel"
+                      placeholder="9999988888"
+                      pattern="[0-9]{10}"
+                      className="form-control form-control-lg"
+                      required
+                      value={mobile}
+                      onChange={handleMobileChange}
+                    />
+                    <label className="form-label" htmlFor="mobile">
+                      Mobile No.
+                    </label>
+                  </div>
                 </div>
-                          </div>
+              </div>
 
-                          <div className="input-group mb-3">
-                              <span className="input-group-text" id="country-code">
-                                  Date of Birth
-                              </span>
-                                  <input
-                                      id="dob"
-                                      type="date"
-                                  className="form-control form-control-lg"
-                                  value={dob}
-                                  onChange={(e) => { setDob(e.target.value) }}
-                                  />
-                          </div>
+              <div className="form-outline mb-3">
+                <div className="input-group">
+                  <span className="input-group-text" id="date">
+                    Date of Birth
+                  </span>
+                  <input
+                    id="dob"
+                    type="date"
+                    className="form-control form-control-lg"
+                    required
+                    value={dob}
+                    onChange={handleDobChange}
+                  />
+                </div>
+              </div>
 
-                          <div className="form-floating mb-3">
-                              <input
-                                  id="address"
-                                  className="form-control form-control-lg"
-                                  placeholder="Address goes here..."
-                                  rows={3}
-                                  value={address}
-                                  onChange={(e) => { setAddress(e.target.value) }}
+              <div className="form-floating mb-3">
+                <textarea
+                  id="address"
+                  className="form-control form-control-lg"
+                  placeholder="Address goes here..."
+                  required
+                  value={address}
+                  onChange={handleAddressChange}
                 />
                 <label className="form-label" htmlFor="address">
                   Resident Address
@@ -175,9 +221,10 @@ const Register = () => {
                   type="password"
                   id="password"
                   className="form-control form-control-lg"
-                                  placeholder="Enter password"
-                                  value={password}
-                                  onChange={(e) => { setPassword(e.target.value) }}
+                  placeholder="Enter password"
+                  required
+                  value={password}
+                  onChange={handlePasswordChange}
                 />
                 <label className="form-label" htmlFor="password">
                   Password
@@ -190,29 +237,35 @@ const Register = () => {
                   id="cnfrmpassword"
                   className="form-control form-control-lg"
                   placeholder="Confirm password"
+                  required
+                  value={cpassword}
+                  onChange={handleCpasswordChange}
                 />
                 <label className="form-label" htmlFor="cnfrmpassword">
                   Confirm Password
                 </label>
               </div>
 
-                          <div className="input-group mb-3">
-                              <span className="input-group-text" id="country-code">
-                                  Image
-                              </span>
-                              <input
-                                  id="image"
-                                  type="file"
-                                  className="form-control form-control-lg"
-                              />
-                          </div>
+              <div className="form-outline mb-3">
+                <div className="input-group">
+                  <span className="input-group-text" id="date">
+                    Profile Picture
+                  </span>
+                  <input
+                    id="image"
+                    type="file"
+                    className="form-control form-control-lg"
+                    required
+                    onChange={handleFileChange}
+                  />
+                </div>
+              </div>
 
               <div className="text-center text-lg-start pt-2">
                 <button
-                                  type="button"
-                                  className="btn btn-primary btn-lg"
-                                  style={{ paddingLeft: "2.5rem", paddingRight: "2.5rem" }}
-                                  onClick={handleRegister}
+                  type="submit"
+                  className="btn btn-primary btn-lg"
+                  style={{ paddingLeft: "2.5rem", paddingRight: "2.5rem" }}
                 >
                   Register
                 </button>

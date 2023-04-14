@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+
 namespace webapi.Models
 {
     public class Employee
@@ -30,15 +31,20 @@ namespace webapi.Models
         public string Twitter { get; set; } = "";
 
         public ICollection<Todo> Todos { get; set; } = new List<Todo>();
-        [JsonIgnore]
         public ICollection<Note> Notes { get; set; } = new List<Note>();
         [NotMapped]
+        [JsonIgnore]
         public ICollection<Employee> Connections { get; set; } = new List<Employee>();
+        [JsonIgnore]
         public ICollection<Employee> ConnectionRequestSent = new List<Employee>();
+        [JsonIgnore]
         public ICollection<Employee> ConnectionRequestReceived = new List<Employee>();
+        [JsonIgnore]
         public ICollection<Project> ProjectsCreated { get; set; } = new List<Project>();
+        [JsonIgnore]
         public ICollection<Chat> Chats { get; set; } = new List<Chat>();
         public int? TeamId { get; set; } = null;
+        [JsonIgnore]
         public Team? Team { get; set; } = null;
     }
 }

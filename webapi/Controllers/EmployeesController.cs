@@ -60,31 +60,14 @@ namespace webapi.Controllers
         // PUT: api/Employees/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> PutEmployee(int id, Employee employee)
         {
-            var previous = await _context.Employees.FindAsync(id);
-
             if (id != employee.Id)
             {
                 return BadRequest();
             }
-            Employee emp=new Employee()
-            {
-                Id = employee.Id,
-                Name = employee.Name,
-                Password=previous.Password,
-                Image= employee.Image,
-                GitHub= employee.GitHub,
-                Website= employee.Website,
-                Facebook= employee.Facebook,
-                Twitter = employee.Twitter,
-                Email=previous.Email,
-                Instagram= employee.Instagram,
-                Mobile= employee.Mobile,
-                Dob= employee.Dob,
-                Address = employee.Address,
-            };
-            _context.Entry(emp).State = EntityState.Modified;
+            _context.Entry(employee).State = EntityState.Modified;
 
             try
             {
@@ -122,6 +105,7 @@ namespace webapi.Controllers
 
         // DELETE: api/Employees/5
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteEmployee(int id)
         {
             if (_context.Employees == null)
@@ -129,9 +113,15 @@ namespace webapi.Controllers
                 return NotFound();
             }
             var employee = await _context.Employees.FindAsync(id);
+            var req_employee = await GetEmployeeFromToken();
+
             if (employee == null)
             {
                 return NotFound();
+            }
+            if(employee.Id != req_employee.Id)
+            {
+                return BadRequest();
             }
 
             _context.Employees.Remove(employee);
@@ -143,6 +133,14 @@ namespace webapi.Controllers
         private bool EmployeeExists(int id)
         {
             return (_context.Employees?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+
+        [AllowAnonymous]
+        [HttpGet("DoesEmailExist/{email}")]
+        public async Task<ActionResult<bool>> DoesEmailExist(string email)
+        {
+            var email_exist = await _context.Employees.AnyAsync(e => e.Email == email);
+            return Ok(email_exist);
         }
 
         [AllowAnonymous]
