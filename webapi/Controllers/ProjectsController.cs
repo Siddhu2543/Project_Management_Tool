@@ -95,17 +95,18 @@ namespace webapi.Controllers
               return Problem("Entity set 'AppDbContext.Projects'  is null.");
           }
             var employee = await GetEmployeeFromToken();
+            
             Debug.WriteLine(employee);
             Project project = new Project()
             {
-                Title= projectdto.Title,
-                Description= projectdto.Description,
-                StartDate= projectdto.StartDate,
-                EndDate= projectdto.EndDate,
-                CreatorId=employee.Id,
-                Image= projectdto.Image,
-                Priority=projectdto.Priority,
-                
+                Title = projectdto.Title,
+                Description = projectdto.Description,
+                StartDate = projectdto.StartDate,
+                EndDate = projectdto.EndDate,
+                CreatorId = employee.Id,
+                Image = projectdto.Image,
+                Priority = projectdto.Priority,
+                Creator = employee
             };
             _context.Projects.Add(project);
             await _context.SaveChangesAsync();

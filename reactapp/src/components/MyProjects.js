@@ -68,15 +68,11 @@ const MyProjects = () => {
                         Image: key,
                         Priority: priority,
                         
-                    }, config)
-
-                    .then((res) => {
-                        const employee = res.data;
-                        console.log(employee);
+                    }, config).then((res) => {
+                        
                     });
-            })
-            .finally(() => {
-                console.log(res)
+            }).finally(() => {
+                console.log("res")
             });
     }
     const handleFileChange = (e) => {
