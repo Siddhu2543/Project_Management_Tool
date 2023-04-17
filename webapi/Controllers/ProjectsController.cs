@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using webapi.Models;
+using webapi.ViewModels;
 
 namespace webapi.Controllers
 {
@@ -83,12 +87,26 @@ namespace webapi.Controllers
         // POST: api/Projects
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Project>> PostProject(Project project)
+        
+        public async Task<ActionResult<Project>> PostProject(ProjectDto projectdto)
         {
           if (_context.Projects == null)
           {
               return Problem("Entity set 'AppDbContext.Projects'  is null.");
           }
+            var employee = await GetEmployeeFromToken();
+            Debug.WriteLine(employee);
+            Project project = new Project()
+            {
+                Title= projectdto.Title,
+                Description= projectdto.Description,
+                StartDate= projectdto.StartDate,
+                EndDate= projectdto.EndDate,
+                CreatorId=employee.Id,
+                Image= projectdto.Image,
+                Priority=projectdto.Priority,
+                
+            };
             _context.Projects.Add(project);
             await _context.SaveChangesAsync();
 
@@ -119,5 +137,28 @@ namespace webapi.Controllers
         {
             return (_context.Projects?.Any(e => e.Id == id)).GetValueOrDefault();
         }
+        private async Task<Employee> GetEmployeeFromToken()
+        {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            if (identity != null)
+            {
+                var userClaims = identity.Claims;
+                var email = userClaims.FirstOrDefault(u => u.Type == ClaimTypes.Email)?.Value;
+                var employee = await _context.Employees.FirstOrDefaultAsync(e => e.Email == email);
+                return employee;
+            }
+            return null;
+        }
+
+        [HttpGet("Employee")]
+        [Authorize]
+        public async Task<ActionResult<List<Project>>> GetEmployeeProjects()
+        {
+            var employee = await GetEmployeeFromToken();
+            var projects = await _context.Projects.Where(n => n.CreatorId == employee.Id).ToListAsync();
+            projects.ForEach(project => { project.Creator = null; });
+            return projects;
+        }
+
     }
 }

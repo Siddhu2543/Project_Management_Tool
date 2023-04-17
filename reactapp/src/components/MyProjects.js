@@ -1,22 +1,92 @@
 import { useEffect, useState } from "react";
 import ProjectCard from "./ProjectCard";
-
+import axios from "axios"
 const MyProjects = () => {
   const [projects, setProjects] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
   const [phases, setPhases] = useState([]);
   const [showPhaseAdd, setShowPhaseAdd] = useState(false);
-  const [phase, setPhase] = useState("");
-
+    const [phase, setPhase] = useState("");
+    const [title, setTitle] = useState("");
+    const [priority, setpriority] = useState("");
+    const [description, setdescription] = useState("");
+    const [startdate, setstartdate] = useState("");
+    const [enddate, setenddate] = useState("");
+    const [image, setimage] = useState("");
+    const [chat, setchat] = useState("");
+    const [fileName, setFileName] = useState();
   const handleAddPhaseClick = () => {
     if (phase !== "") setPhases((p) => p.concat(phase));
     setShowPhaseAdd(false);
     setPhase("");
-  };
+    };
+    const getProjects = () => {
 
+        const token = JSON.parse(localStorage.getItem("USER"));
+        const config = {
+            headers: {
+                Authorization: "Bearer " + token,
+            },
+        };
+        axios
+            .get("https://localhost:7288/api/Projects/Employee", config)
+            .then((res) => {
+                setProjects(res.data);
+            });
+}
+    const addproject = () => {
+        
+        const data = {
+            title: title,
+            description: description,
+            startdate: startdate,
+            enddate: enddate,
+        
+            priority: priority, 
+        }
+        console.log(data)
+        const token = JSON.parse(localStorage.getItem("USER"));
+        const config = {
+            headers: {
+                Authorization: "Bearer " + token,
+            },
+        };
+        const formData = new FormData();
+        formData.append("fileName", fileName.name);
+        formData.append("formFile", fileName);
+        
+        axios
+            .post("https://localhost:7288/api/Files/upload", formData, config)
+            .then((res) => {
+                const key = res.data;
+                console.log(key)
+                axios
+                    .post("https://localhost:7288/api/Projects", {
+                        Title: title,
+                        Description: description,
+                        Startdate: startdate,
+                        Enddate: enddate,
+                        Image: key,
+                        Priority: priority,
+                        
+                    }, config)
+
+                    .then((res) => {
+                        const employee = res.data;
+                        console.log(employee);
+                    });
+            })
+            .finally(() => {
+                console.log(res)
+            });
+    }
+    const handleFileChange = (e) => {
+        setFileName(e.target.files[0]);
+    };
   const handlePhaseTitleChange = (e) => {
     setPhase(e.target.value);
-  };
+    };
 
+    useEffect(() => { getProjects() }, [projects])
   return (
     <>
       <div className="row mb-3">
@@ -75,14 +145,14 @@ const MyProjects = () => {
                 <div className="col-md-6 mb-1">
                   <label htmlFor="title" className="form-label text-primary">
                     Project Title
-                  </label>
-                  <input type="text" className="form-control" id="title" />
+                                  </label>
+                                  <input type="text" className="form-control" id="title" value={title} onChange={(e) => { setTitle(e.target.value) }} />
                 </div>
                 <div className="col-md-6 mb-1">
                   <label htmlFor="type" className="form-label text-primary">
-                    Type
+                                      Priority Type
                   </label>
-                  <select id="type" className="form-select">
+                                  <select id="type" className="form-select" value={priority} onChange={(e) => setpriority(e.target.value)}>
                     <option>Low Priority</option>
                     <option>Normal</option>
                     <option>High Priority</option>
@@ -94,7 +164,8 @@ const MyProjects = () => {
                   </label>
                   <textarea
                     className="form-control"
-                    id="description"
+                                      id="description"
+                                      value={description} onChange={(e) => { setdescription(e.target.value) } }
                     placeholder="Please give details about project here..."
                   ></textarea>
                 </div>
@@ -102,25 +173,27 @@ const MyProjects = () => {
                   <label htmlFor="startdate" className="form-label text-primary">
                     Start Date
                   </label>
-                  <input type="date" className="form-control" id="startdate" />
+                                  <input type="date" className="form-control" id="startdate"
+                                      value={startdate} onChange={(e) => { setstartdate(e.target.value) }}                                  />
                 </div>
                 <div className="col-md-6 mb-1">
                   <label htmlFor="duedate" className="form-label text-primary">
                     Due Date
-                  </label>
-                  <input type="date" className="form-control" id="duedate" />
+                                  </label>
+                                  <input type="date" className="form-control" id="duedate" value={enddate} onChange={(e) => { setenddate(e.target.value) } } />
                 </div>
                 <div className="col-12 mb-1">
                   <label htmlFor="projectcover" className="form-label text-primary">
                     Cover Image
                   </label>
                   <input
-                    type="file"
-                    className="form-control"
-                    id="projectcover"
+                                      type="file"
+                                      className="form-control"
+                                      id="projectcover"
+                                      onChange={handleFileChange }
                   />
                 </div>
-                <div className="col-12 mb-3">
+                {/*<div className="col-12 mb-3">
                   <label htmlFor="projectdocs" className="form-label text-primary">
                     Necessary Attachment
                   </label>
@@ -189,13 +262,14 @@ const MyProjects = () => {
                       </button>
                     </div>
                   </>
-                )}
+                )}*/}
                 <div className="col-12">
                   <div className="form-check">
                     <input
                       className="form-check-input"
-                      type="checkbox"
-                      id="createchat"
+                                          type="checkbox"
+                                          value={chat} onChange={(e) => { setchat(e.target.value) } }             id="createchat"
+
                     />
                     <label className="form-check-label text-primary" htmlFor="createchat">
                       Create Project Chat Group?
@@ -206,9 +280,10 @@ const MyProjects = () => {
             </div>
             <div className="modal-footer">
               <button
-                type="button"
-                className="btn btn-primary"
-                data-bs-dismiss="modal"
+                              type="button"
+                              className="btn btn-primary"
+                              data-bs-dismiss="modal"
+                              onClick={addproject }
               >
                 Create
               </button>

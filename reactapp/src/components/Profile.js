@@ -225,13 +225,11 @@ const Profile = () => {
                                   className="progress-bar"
                                   role="progressbar"
                                   style={{ width: "80%" }}
-                                  aria-valuenow={
-                                    employee?.team.pTasks.filter(
-                                      (t) => t.isCompleted
-                                    ).length
-                                  }
+                                  aria-valuenow="10"
+                                   
+                                  
                                   aria-valuemin="0"
-                                  aria-valuemax={employee?.team.pTasks.length}
+                                  aria-valuemax="10"
                                 ></div>
                               </div>
                             </div>
@@ -248,9 +246,7 @@ const Profile = () => {
                         <span className="text-primary font-italic me-1">
                           Recently Created Project
                         </span>{" "}
-                        {employee?.projectsCreated.length
-                          ? employee?.projectsCreated.slice(-1).title
-                          : "No project created yet!"}
+                        {"No project created yet!"}
                       </p>
 
                       {employee?.teamId && (

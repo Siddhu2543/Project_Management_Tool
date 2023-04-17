@@ -46,7 +46,7 @@ const Register = () => {
   };
 
   const handleRegisterClick = (e) => {
-    e.preventDefault();
+    //e.preventDefault();
     if (password != cpassword) {
       alert("Password does not match Confirm Password!");
       return;
