@@ -19,9 +19,5 @@ public class ProjectDto
         public DateTime EndDate { get; set; }
         [Required]
         public string Image { get; set; }
-        [Required]
-        public int CreatorId { get; set; }
-        [JsonIgnore]
-        public Employee Creator { get; set; }
 }
 

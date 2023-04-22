@@ -15,7 +15,7 @@ namespace webapi.Models
         [Required]
         public int ProjectId { get; set; }
         [JsonIgnore]
-        public Project Project { get; set; }
+        public Project? Project { get; set; }
         [JsonIgnore]
         public ICollection<PTask> PTasks { get; set; } = new List<PTask>();
     }

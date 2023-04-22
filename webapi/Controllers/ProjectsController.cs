@@ -26,13 +26,19 @@ namespace webapi.Controllers
 
         // GET: api/Projects
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<Project>>> GetProjects()
         {
           if (_context.Projects == null)
           {
               return NotFound();
           }
-            return await _context.Projects.ToListAsync();
+          var employee = await GetEmployeeFromToken();
+          var p1 = await _context.Projects.Include(p => p.Teams).ToListAsync();
+            var p2 = p1.Where(p => p.Teams.Any(t => t.Employees.Any(e => e.Id == employee.Id))).ToList();
+            var p3 = p1.Where(p => p.CreatorId == employee.Id).ToList();
+            var projects = p3.Concat(p2).ToList();
+            return projects;
         }
 
         // GET: api/Projects/5
@@ -87,7 +93,7 @@ namespace webapi.Controllers
         // POST: api/Projects
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        
+        [Authorize]
         public async Task<ActionResult<Project>> PostProject(ProjectDto projectdto)
         {
           if (_context.Projects == null)
@@ -95,18 +101,15 @@ namespace webapi.Controllers
               return Problem("Entity set 'AppDbContext.Projects'  is null.");
           }
             var employee = await GetEmployeeFromToken();
-            
-            Debug.WriteLine(employee);
             Project project = new Project()
             {
                 Title = projectdto.Title,
                 Description = projectdto.Description,
+                Priority = projectdto.Priority,
                 StartDate = projectdto.StartDate,
                 EndDate = projectdto.EndDate,
-                CreatorId = employee.Id,
                 Image = projectdto.Image,
-                Priority = projectdto.Priority,
-                Creator = employee
+                CreatorId = employee.Id
             };
             _context.Projects.Add(project);
             await _context.SaveChangesAsync();

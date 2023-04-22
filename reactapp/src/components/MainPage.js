@@ -1,12 +1,41 @@
 import "../styles/mainpage.css";
 import { Link, NavLink, Outlet } from "react-router-dom";
 import ProjectCard from "./ProjectCard";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TodoCard from "./TodoCard";
+import axios from "axios";
 
 const MainPage = () => {
-  const [projects, setProjects] = useState([1, 2, 3, 4]);
+  const [projects, setProjects] = useState([]);
   const [todos, setTodos] = useState([1, 2, 3, 4]);
+
+  useEffect(() => {
+    const token = JSON.parse(localStorage.getItem("USER"));
+    const config = {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    };
+
+    axios.get("https://localhost:7288/api/Projects", config).then((res) => {
+      setProjects(res.data.slice(0, 4));
+    });
+  }, []);
+
+  useEffect(() => {
+    const token = JSON.parse(localStorage.getItem("USER"));
+    const config = {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    };
+
+    axios
+      .get("https://localhost:7288/api/Todoes/Employee", config)
+      .then((res) => {
+        setTodos(res.data.slice(0, 4));
+      });
+  }, []);
   return (
     <>
       <div className="row mb-3">
@@ -81,8 +110,8 @@ const MainPage = () => {
         </div>
         <div className="col-12">
           <div className="row">
-            {projects.map((p) => (
-              <ProjectCard key={p} />
+            {projects.map((p, i) => (
+              <ProjectCard key={i} project={p} />
             ))}
           </div>
         </div>
@@ -102,7 +131,13 @@ const MainPage = () => {
         </div>
         <div className="col-12">
           <ol className="list-group list-group-numbered">
-            {todos.map((t) => <TodoCard key={t} />)}
+            {todos
+              .filter(
+                (t) => t.dueDate > new Date().toISOString() && !t.isCompleted
+              )
+              .map((t, i) => (
+                <TodoCard key={i} todo={t} />
+              ))}
           </ol>
         </div>
       </div>

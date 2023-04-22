@@ -89,6 +89,8 @@ namespace webapi.Controllers
           {
               return Problem("Entity set 'AppDbContext.Phases'  is null.");
           }
+          var project = await _context.Projects.FindAsync(phase.ProjectId);
+            phase.Project = project;
             _context.Phases.Add(phase);
             await _context.SaveChangesAsync();
 
