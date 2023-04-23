@@ -24,6 +24,12 @@ const Profile = () => {
       });
   }, []);
 
+  useEffect(() => {
+    setImageUrl(
+      `https://projectmanagementtool.s3.ap-south-1.amazonaws.com/${employee?.image}`
+    );
+  }, [employee]);
+
   return (
     <>
       <section style={{ backgroundColor: "#eee" }} className="mb-3">
@@ -226,8 +232,6 @@ const Profile = () => {
                                   role="progressbar"
                                   style={{ width: "80%" }}
                                   aria-valuenow="10"
-                                   
-                                  
                                   aria-valuemin="0"
                                   aria-valuemax="10"
                                 ></div>

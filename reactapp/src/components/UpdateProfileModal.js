@@ -94,15 +94,13 @@ const UpdateProfileModal = ({ employee, setEmployee }) => {
       emp.image = res_key.data;
     }
 
-    await axios.put(
-      `https://localhost:7288/api/Employees/${employee.id}`,
-      emp,
-      config
-    );
-
-    axios
-      .get("https://localhost:7288/api/Employees/FindByToken", config)
-      .then((res) => setEmployee(res.data))
+    await axios
+      .put(`https://localhost:7288/api/Employees/${employee.id}`, emp, config)
+      .then(() => {
+        axios
+          .get("https://localhost:7288/api/Employees/FindByToken", config)
+          .then((res) => setEmployee(res.data));
+      })
       .finally(() => {
         setIsLoading(false);
       });
@@ -243,7 +241,7 @@ const UpdateProfileModal = ({ employee, setEmployee }) => {
                   Instagram Profile
                 </label>
                 <input
-                  type="url"
+                  type={"url"}
                   className="form-control"
                   id="instagram"
                   placeholder="https://instagram.com"
@@ -267,7 +265,6 @@ const UpdateProfileModal = ({ employee, setEmployee }) => {
               <div className="mb-3">
                 <button
                   type="submit"
-                  role="button"
                   data-bs-dismiss="modal"
                   className="btn btn-primary float-end"
                 >
