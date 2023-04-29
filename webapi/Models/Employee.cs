@@ -34,6 +34,8 @@ namespace webapi.Models
         public ICollection<Note> Notes { get; set; } = new List<Note>();
         [NotMapped]
         [JsonIgnore]
+        public ICollection<Employee> ConnectionsSelf { get; set; } = new List<Employee>();
+        [JsonIgnore]
         public ICollection<Employee> Connections { get; set; } = new List<Employee>();
         [JsonIgnore]
         public ICollection<Employee> ConnectionRequestSent = new List<Employee>();

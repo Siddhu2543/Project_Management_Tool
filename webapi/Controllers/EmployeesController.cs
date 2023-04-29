@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using NuGet.Common;
 using webapi.Models;
 using webapi.ViewModels;
 
@@ -204,6 +205,84 @@ namespace webapi.Controllers
                 return employee;
             }
             return null;
+        }
+
+        [HttpGet("ConnectionRequests")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<Employee>>> Received()
+        {
+            var employee = await GetEmployeeFromToken();
+            var employeewithconnections = await _context.Employees.Include(e => e.ConnectionRequestReceived).Where(e => e.Id == employee.Id).FirstOrDefaultAsync();
+            if (employee == null)
+            {
+                return NotFound();
+            }
+
+            var connectionRequestsReceived = employeewithconnections.ConnectionRequestReceived.ToList();
+
+            return connectionRequestsReceived;
+        }
+
+        [HttpGet("search/{name}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<Employee>>> Search(string name)
+        {
+            var curremployee = await GetEmployeeFromToken();
+            var employee = await _context.Employees.Where(e=>e.Name.Contains(name) && e.Id != curremployee.Id).ToListAsync();
+            return Ok(employee);
+        }
+
+        [Authorize]
+        [HttpGet("addConnection/{id}")]
+        public async Task<ActionResult> AddConnenction(int Id)
+        {
+            var employee = await _context.Employees.FindAsync(Id);
+            var curremp = await GetEmployeeFromToken();
+            curremp.ConnectionRequestSent.Add(employee);
+
+            _context.Entry(curremp).State = EntityState.Modified;
+            await _context.SaveChangesAsync();  
+           
+
+            return Ok();
+        }
+
+        [Authorize]
+        [HttpGet("acceptConnection/{id}/{res}")]
+        public async Task<ActionResult> AcceptConnection(int id,bool res)
+        {
+            var employee = await _context.Employees.FindAsync(id);
+            var curremp = await GetEmployeeFromToken();
+            var newemp = await _context.Employees.Include(e => e.ConnectionRequestReceived).Where(e => e.Id == curremp.Id).FirstOrDefaultAsync();
+            bool isdeleted=curremp.ConnectionRequestReceived.Remove(employee);
+            await _context.SaveChangesAsync(); 
+            if (res)
+            { 
+                newemp.Connections.Add(employee);
+                employee.Connections.Add(curremp);
+                _context.Entry(newemp).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+                _context.Entry(employee).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok();
+        }
+
+        [HttpGet("Connections")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<Employee>>> GetConnections()
+        {
+            var employee = await GetEmployeeFromToken();
+            var employeewithconnections = await _context.Employees.Include(e => e.Connections).Where(e => e.Id == employee.Id).FirstOrDefaultAsync();
+            if (employee == null)
+            {
+                return NotFound();
+            }
+
+            var connections= employeewithconnections.Connections.ToList();
+
+            return connections;
         }
     }
 }

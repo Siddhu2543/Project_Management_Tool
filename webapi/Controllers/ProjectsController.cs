@@ -62,13 +62,20 @@ namespace webapi.Controllers
         // PUT: api/Projects/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProject(int id, Project project)
+        public async Task<IActionResult> PutProject(int id, ProjectDto projectdto)
         {
-            if (id != project.Id)
+            if (id != projectdto.Id)
             {
                 return BadRequest();
             }
-
+            var project = await _context.Projects.FindAsync(id);
+           
+            project.Title=projectdto.Title;
+            project.Description=projectdto.Description;
+            project.StartDate=projectdto.StartDate;
+            project.EndDate=projectdto.EndDate;
+            project.Image=projectdto.Image;
+            project.Priority=projectdto.Priority;
             _context.Entry(project).State = EntityState.Modified;
 
             try

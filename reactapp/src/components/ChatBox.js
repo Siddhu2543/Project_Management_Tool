@@ -1,4 +1,7 @@
+import { io } from "socket.io-client";
+
 const ChatBox = () => {
+  const socket = io('http://localhost:4000')
   return (
     <section style={{ backgroundColor: "white" }} className="mb-3">
       <div className="p-3">

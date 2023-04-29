@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 const ProjectTeams = () => {
   const [teams, setTeams] = useState([1, 2, 3, 4]);
@@ -16,7 +16,17 @@ const ProjectTeams = () => {
       setMembers(res.data);
     });
   };
-
+  const getteams = () => {
+    const token = JSON.parse(localStorage.getItem("USER"));
+    const config = {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    };
+    axios.get("https://localhost:7288/api/Teams", config).then((res) => {
+      setTeams(res.data);
+    });
+  };
   const Addteamhandler = () => {
     const token = JSON.parse(localStorage.getItem("USER"));
     const config = {
@@ -38,6 +48,7 @@ const ProjectTeams = () => {
         console.log(res.data);
       });
   };
+  useEffect(()=>{getteams()},[])
   return (
     <>
       <div
@@ -78,7 +89,7 @@ const ProjectTeams = () => {
                           aria-expanded="false"
                           aria-controls={"flush-collapseOne" + index}
                         >
-                          Team #{index + 1}
+                          {t.name}
                         </button>
                       </h2>
                       <div

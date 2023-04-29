@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 
-const ConnectionCard = () => {
+const ConnectionCard = ({employee}) => {
   return (
     <li className="list-group-item d-flex">
       <div className="me-3">
         <img
-          src="https://bootdey.com/img/Content/avatar/avatar1.png"
+          src={`https://projectmanagementtool.s3.ap-south-1.amazonaws.com/${employee.image}`}
           height={"70px"}
           width={"70px"}
           className="con-profile-img"
@@ -13,16 +13,15 @@ const ConnectionCard = () => {
         />
       </div>
       <div className="d-block">
-        <Link className="h3">John Doe</Link>
+        <Link className="h3">{employee.name}</Link>
         <i className="fa-solid fa-trash fa-xl ms-3 align-baseline text-primary" role={"button"} title="Remove Connection"></i>
-        <p className="h5 fw-normal">Role: {"Developer"}</p>
       </div>
       <div className="ms-auto text-center">
         <p className="fs-6 text-primary">
-          <i className="fa-solid fa-envelope text-danger"></i> johndoe@gmail.com
+          <i className="fa-solid fa-envelope text-danger"></i>{employee.email}
         </p>
         <p className="fs-6 text-primary">
-          <i className="fa-solid fa-phone text-danger"></i> +91 99889 98888
+          <i className="fa-solid fa-phone text-danger"></i>{employee.mobile}
         </p>
       </div>
     </li>

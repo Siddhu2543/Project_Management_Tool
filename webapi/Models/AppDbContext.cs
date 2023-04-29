@@ -24,6 +24,7 @@ namespace webapi.Models
             modelBuilder.Entity<Employee>().HasMany(e => e.Notes).WithOne(n => n.Employee).HasForeignKey(n => n.EmployeeId);
             modelBuilder.Entity<Employee>().HasMany(e => e.ConnectionRequestReceived).WithMany(e => e.ConnectionRequestSent);
             modelBuilder.Entity<Employee>().HasMany(e => e.ProjectsCreated).WithOne(p => p.Creator).HasForeignKey(p => p.CreatorId);
+            modelBuilder.Entity<Employee>().HasMany(e => e.ConnectionsSelf).WithMany(e => e.Connections);
             modelBuilder.Entity<Project>().HasMany(p => p.Phases).WithOne(p => p.Project).HasForeignKey(p => p.ProjectId);
             modelBuilder.Entity<Project>().HasMany(p => p.Teams).WithOne(t => t.Project).HasForeignKey(t => t.ProjectId);
             modelBuilder.Entity<Team>().HasMany(t => t.Employees).WithOne(e => e.Team).HasForeignKey(e => e.TeamId);
