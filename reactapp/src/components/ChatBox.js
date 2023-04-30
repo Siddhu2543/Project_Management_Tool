@@ -1,11 +1,50 @@
+import axios from "axios";
+import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
 const ChatBox = () => {
-  const socket = io('http://localhost:4000')
+  const endpoint = "http://localhost:4000";
+  var socket;
+  const [employee, setEmployee] = useState("");
+  const [socketcon, setsocketcon] = useState("false");
+  const findEmpbytoken = () => {
+    const token = JSON.parse(localStorage.getItem("USER"));
+    const config = {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    };
+    axios
+      .get("https://localhost:7288/api/Employees/FindByToken", config)
+      .then((res) => {
+        const emp = res.data;
+        setEmployee(emp);
+        console.log("hello");
+        console.log(employee);
+      }).catch((err) => {console.log(err);});
+  };
+
+  useEffect(() => {
+    findEmpbytoken();
+  }, []);
+  
+  useEffect(() => {
+    if (employee) {
+      socket = io(endpoint);
+      socket.emit("setup", employee);
+      socket.emit("connection", () => {
+        setsocketcon(true);
+      });
+    }
+  }, [employee]);
+  
+
   return (
     <section style={{ backgroundColor: "white" }} className="mb-3">
       <div className="p-3">
-        <h1 className="text-primary">Chats</h1>
+        <h1 className="text-primary" id="text-primary">
+          Chats
+        </h1>
       </div>
       <div className="p-3">
         <div className="accordion" id="chatSelection">
@@ -326,6 +365,7 @@ const ChatBox = () => {
                           <button
                             type="button"
                             className="btn btn-info btn-rounded float-end"
+                            
                           >
                             Send
                           </button>

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using webapi.Models;
-
+using webapi.ViewModels;
 namespace webapi.Controllers
 {
     [Route("api/[controller]")]
@@ -21,14 +21,28 @@ namespace webapi.Controllers
         }
 
         // GET: api/PTasks
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<PTask>>> GetPTasks()
+        [HttpGet("project/{id}")]
+        public async Task<ActionResult<IEnumerable<PTask>>> GetPTasks(int id)
         {
           if (_context.PTasks == null)
           {
               return NotFound();
           }
-            return await _context.PTasks.ToListAsync();
+            return await _context.PTasks.Include(t=>t.Team).Where(t => t.Team.ProjectId==id).ToListAsync();
+        }
+
+        [HttpPut("toggleStatus/{id}")]
+        public async Task<ActionResult> ToggleStatus(int id)
+        {
+            if (_context.PTasks == null)
+            {
+                return NotFound();
+            }
+            var pTask = await _context.PTasks.FindAsync(id);
+            pTask.IsCompleted = !pTask.IsCompleted;
+            _context.Entry(pTask).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return Ok();
         }
 
         // GET: api/PTasks/5
@@ -83,12 +97,22 @@ namespace webapi.Controllers
         // POST: api/PTasks
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<PTask>> PostPTask(PTask pTask)
+        public async Task<ActionResult<PTask>> PostPTask(PTaskDTO pTaskdto)
         {
           if (_context.PTasks == null)
           {
               return Problem("Entity set 'AppDbContext.PTasks'  is null.");
           }
+          var pTask=new PTask()
+          {
+              Name = pTaskdto.Name,
+              StartDate= pTaskdto.StartDate,
+              Description= pTaskdto.Description,
+              EndDate= pTaskdto.EndDate,
+              PhaseId = pTaskdto.PhaseId,
+              TeamId= pTaskdto.TeamId,
+              Tasks = pTaskdto.Tasks
+          };
             _context.PTasks.Add(pTask);
             await _context.SaveChangesAsync();
 

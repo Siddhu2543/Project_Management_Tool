@@ -45,8 +45,7 @@ namespace webapi.Models
         public ICollection<Project> ProjectsCreated { get; set; } = new List<Project>();
         [JsonIgnore]
         public ICollection<Chat> Chats { get; set; } = new List<Chat>();
-        public int? TeamId { get; set; } = null;
         [JsonIgnore]
-        public Team? Team { get; set; } = null;
+        public ICollection<Team> Teams { get; set; } = new List<Team>();
     }
 }

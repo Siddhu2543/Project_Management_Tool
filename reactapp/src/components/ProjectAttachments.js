@@ -1,8 +1,65 @@
-import { useState } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import AttachmentCard from "./AttachmentCard";
 
-const ProjectAttachments = () => {
-  const [attachments, setAttachments] = useState([1, 2, 3, 4]);
+const ProjectAttachments = ({ project }) => {
+  const [attachments, setAttachments] = useState([]);
+  const [file, setFile] = useState([]);
+  const [isReady, setIsReady] = useState(false);
+
+  const getAttachments = () => {
+    axios
+      .get(`https://localhost:7288/api/Attachments/project/${project?.id}`)
+      .then((res) => {
+        setAttachments(res.data);
+      });
+  };
+
+  useEffect(() => {
+    if (project) getAttachments();
+  }, [project]);
+
+  const uploadAttachment = (e) => {
+    setFile(e.target.files[0]);
+    setIsReady(true);
+  };
+
+  const handleUploadClick = () => {
+    const formData = new FormData();
+    formData.append("fileName", file.name);
+    formData.append("formFile", file);
+    axios
+      .post("https://localhost:7288/api/Files/upload", formData)
+      .then((res) => {
+        var key = res.data;
+        console.log(key);
+        const token = JSON.parse(localStorage.getItem("USER"));
+        const config = {
+          headers: {
+            Authorization: "Bearer " + token,
+          },
+        };
+        axios
+          .post(
+            "https://localhost:7288/api/Attachments",
+            {
+              fileName: file.name,
+              filePath: key,
+              projectId: project.id,
+            },
+            config
+          )
+          .then((res) => {
+            console.log(res.data);
+            getAttachments();
+          });
+      })
+      .finally(() => {
+        setIsReady(false);
+      });
+  };
+
   return (
     <div
       className="tab-pane fade"
@@ -20,7 +77,13 @@ const ProjectAttachments = () => {
             type="file"
             className="btn btn-outline-light mb-3"
             title="Add Attachments"
+            onChange={uploadAttachment}
           />
+          {isReady && (
+            <button className="btn btn-primary" onClick={handleUploadClick}>
+              Upload
+            </button>
+          )}
         </div>
         <div className="d-flex justify-content-between">
           <p className="text-muted w-25">File Name</p>
@@ -29,21 +92,9 @@ const ProjectAttachments = () => {
           <p className="text-muted w-25">Edit</p>
         </div>
         <hr className="mb-3 text-white" />
-        {attachments.map((a, index) => {
-          return (
-            <div className="mb-3 d-flex justify-content-between" key={index}>
-              <Link title="Download" className="text-white fs-md w-25">
-                SRS Document
-              </Link>
-              <p className="text-white fs-md w-25">05/03/2023</p>
-              <p className="text-white fs-md w-25">Siddharth Vadgama</p>
-              <p className="text-white fs-md w-25">
-                <i className="fa-solid fa-pen me-3" title="Edit/Upload"></i>
-                <i className="fa-solid fa-trash" title="Remove"></i>
-              </p>
-            </div>
-          );
-        })}
+        {attachments.map((a, index) => (
+          <AttachmentCard a={a} getAttachments={getAttachments} key={index} />
+        ))}
       </div>
     </div>
   );

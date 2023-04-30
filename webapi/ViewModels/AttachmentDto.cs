@@ -1,9 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
-namespace webapi.Models
+namespace webapi.ViewModels
 {
-    public class Attachment
+    public class AttachmentDto
     {
         public int Id { get; set; }
         [Required]
@@ -11,11 +10,6 @@ namespace webapi.Models
         [Required]
         public string FilePath { get; set; }
         [Required]
-        public string AddedBy { get; set; }
-        [Required]
         public int ProjectId { get; set; }
-        [JsonIgnore]
-        public Project Project { get; set; }
-        public DateTime AddedDate { get; set; } = DateTime.Now;
     }
 }

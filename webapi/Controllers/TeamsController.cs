@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using webapi.Models;
+using webapi.ViewModels;
 
 namespace webapi.Controllers
 {
@@ -21,14 +22,14 @@ namespace webapi.Controllers
         }
 
         // GET: api/Teams
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Team>>> GetTeams()
+        [HttpGet("project/{id}")]
+        public async Task<ActionResult<IEnumerable<Team>>> GetTeams(int id)
         {
           if (_context.Teams == null)
           {
               return NotFound();
           }
-            return await _context.Teams.ToListAsync();
+            return await _context.Teams.Where(t => t.ProjectId == id).ToListAsync();
         }
 
         // GET: api/Teams/5
@@ -83,12 +84,18 @@ namespace webapi.Controllers
         // POST: api/Teams
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Team>> PostTeam(Team team)
+        public async Task<ActionResult<Team>> PostTeam(TeamDTO teamDto)
         {
           if (_context.Teams == null)
           {
               return Problem("Entity set 'AppDbContext.Teams'  is null.");
           }
+            var team = new Team()
+            {
+                Name = teamDto.Name,
+                Description = teamDto.Description,
+                ProjectId = teamDto.ProjectId
+            };
             _context.Teams.Add(team);
             await _context.SaveChangesAsync();
 
@@ -118,6 +125,38 @@ namespace webapi.Controllers
         private bool TeamExists(int id)
         {
             return (_context.Teams?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+
+        [HttpPut("addMember/{id}/{empId}")]
+        public async Task<ActionResult> AddTeamMembers(int id, int empId)
+        {
+            if (_context.Teams == null)
+            {
+                return Problem("Entity set 'AppDbContext.Teams'  is null.");
+            }
+
+            var team = await _context.Teams.FindAsync(id);
+            var emp = await _context.Employees.FindAsync(empId);
+            team.Employees.Add(emp);
+            _context.Entry(team).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            emp.IsAssigned = true;
+            _context.Entry(emp).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        [HttpGet("members/{id}")]
+        public async Task<ActionResult<IEnumerable<Employee>>> GetMembers(int id)
+        {
+            if (_context.Teams == null)
+            {
+                return NotFound();
+            }
+            var members = await _context.Teams.Include(t => t.Employees).Where(t => t.Id == id).FirstOrDefaultAsync();
+            return Ok(members.Employees);
         }
     }
 }

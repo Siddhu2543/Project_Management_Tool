@@ -34,10 +34,10 @@ namespace webapi.Controllers
               return NotFound();
           }
           var employee = await GetEmployeeFromToken();
-          var p1 = await _context.Projects.Include(p => p.Teams).ToListAsync();
+          var p1 = await _context.Projects.Include(p => p.Teams).ThenInclude(t => t.Employees).ToListAsync();
             var p2 = p1.Where(p => p.Teams.Any(t => t.Employees.Any(e => e.Id == employee.Id))).ToList();
             var p3 = p1.Where(p => p.CreatorId == employee.Id).ToList();
-            var projects = p3.Concat(p2).ToList();
+            var projects = p3.Union(p2).ToList();
             return projects;
         }
 

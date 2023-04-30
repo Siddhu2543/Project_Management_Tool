@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using webapi.Models;
+using webapi.ViewModels;
 
 namespace webapi.Controllers
 {
@@ -21,14 +24,14 @@ namespace webapi.Controllers
         }
 
         // GET: api/Attachments
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Attachment>>> GetAttachments()
+        [HttpGet("project/{id}")]
+        public async Task<ActionResult<IEnumerable<Attachment>>> GetAttachments(int id)
         {
           if (_context.Attachments == null)
           {
               return NotFound();
           }
-            return await _context.Attachments.ToListAsync();
+            return await _context.Attachments.Where(a => a.ProjectId == id).ToListAsync();
         }
 
         // GET: api/Attachments/5
@@ -83,12 +86,21 @@ namespace webapi.Controllers
         // POST: api/Attachments
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Attachment>> PostAttachment(Attachment attachment)
+        [Authorize]
+        public async Task<ActionResult<Attachment>> PostAttachment(AttachmentDto attachmentDto)
         {
           if (_context.Attachments == null)
           {
               return Problem("Entity set 'AppDbContext.Attachments'  is null.");
           }
+            var employee = await GetEmployeeFromToken();
+          var attachment = new Attachment()
+          {
+              FileName= attachmentDto.FileName,
+              FilePath= attachmentDto.FilePath,
+              AddedBy=employee.Name,
+              ProjectId=attachmentDto.ProjectId
+          };
             _context.Attachments.Add(attachment);
             await _context.SaveChangesAsync();
 
@@ -118,6 +130,19 @@ namespace webapi.Controllers
         private bool AttachmentExists(int id)
         {
             return (_context.Attachments?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+
+        private async Task<Employee> GetEmployeeFromToken()
+        {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            if (identity != null)
+            {
+                var userClaims = identity.Claims;
+                var email = userClaims.FirstOrDefault(u => u.Type == ClaimTypes.Email)?.Value;
+                var employee = await _context.Employees.FirstOrDefaultAsync(e => e.Email == email);
+                return employee;
+            }
+            return null;
         }
     }
 }

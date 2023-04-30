@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import "../styles/projectdashboard.css";
 import Dashboard from "./Dashboard";
 import ProjectTeams from "./ProjectTeams";
@@ -7,13 +7,29 @@ import ProjectPhases from "./ProjectPhases";
 import ProjectAttachments from "./ProjectAttachments";
 import EmployeeSection from "./EmployeeSection";
 import EditProject from "./EditProject";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 const ProjectDashboard = () => {
+  const { id } = useParams();
+  const [project, setProject] = useState();
+
+  useEffect(() => {
+    axios.get(`https://localhost:7288/api/Projects/${id}`).then((res) => {
+      setProject(res.data);
+    });
+  }, []);
+
   return (
     <>
       <nav className="navbar" id="projnav">
         <div className="projecttitle px-3">
-          <a className="navbar-brand h1" style={{textDecoration: 'underline'}}>Project Management Tool</a>
+          <a
+            className="navbar-brand h1"
+            style={{ textDecoration: "underline" }}
+          >
+            Project Management Tool
+          </a>
         </div>
         <div
           className="nav nav-tabs ms-auto me-3"
@@ -115,11 +131,11 @@ const ProjectDashboard = () => {
       </nav>
       <div className="tab-content mb-3" id="nav-tabContent">
         <Dashboard />
-        <ProjectTeams />
-        <ProjectTasks />
-        <ProjectPhases />
-        <ProjectAttachments />
-        <EmployeeSection />
+        <ProjectTeams project={project} />
+        <ProjectTasks project={project} />
+        <ProjectPhases project={project} />
+        <ProjectAttachments project={project} />
+        <EmployeeSection project={project} />
         <EditProject />
       </div>
     </>

@@ -1,9 +1,19 @@
-import { useState } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import EditPhaseModal from "./EditPhaseModal";
 
-const ProjectPhases = () => {
-  const [phases, setPhases] = useState([1, 2, 3, 4]);
+const ProjectPhases = ({ project }) => {
+  const [phases, setPhases] = useState([]);
   const [showAddPhase, setShowAddPhase] = useState(false);
   const [phaseTitle, setPhaseTitle] = useState("");
+
+  useEffect(() => {
+    axios
+      .get(`https://localhost:7288/api/Phases/project/${project?.id}`)
+      .then((res) => {
+        setPhases(res.data);
+      });
+  }, [project]);
 
   const handlePhaseTitleChange = (e) => {
     setPhaseTitle(e.target.value);
@@ -11,6 +21,20 @@ const ProjectPhases = () => {
 
   const handleAddPhaseClick = () => {
     setPhaseTitle("");
+    axios
+      .post("https://localhost:7288/api/Phases", {
+        name: phaseTitle,
+        description: phaseTitle,
+        number: phases.length + 1,
+        projectId: project.id,
+      })
+      .then(() => {
+        axios
+          .get(`https://localhost:7288/api/Phases/project/${project?.id}`)
+          .then((res) => {
+            setPhases(res.data);
+          });
+      });
     setShowAddPhase(false);
   };
   return (
@@ -59,7 +83,7 @@ const ProjectPhases = () => {
                 key={index}
               >
                 <div className="d-flex w-100 justify-content-between">
-                  <h5 className="mb-3 h3 text-primary">Implementation</h5>
+                  <h5 className="mb-3 h3 text-primary">{p?.name}</h5>
                 </div>
                 <div className="d-flex w-100 justify-content-start">
                   <p className="mb-1 text-muted me-2">
@@ -72,11 +96,11 @@ const ProjectPhases = () => {
                   <p className="mb-1 h5">10</p>
                 </div>
                 <hr className="mb-3" />
-                <div className="d-flex w-100 justify-content-between">
+                {/* <div className="d-flex w-100 justify-content-center">
                   <button
                     className="btn btn-secondary"
                     data-bs-toggle="modal"
-                    data-bs-target="#editphase"
+                    data-bs-target={"#editphase" + p.id}
                   >
                     Edit Phase
                   </button>
@@ -87,47 +111,10 @@ const ProjectPhases = () => {
                     Remove Phase
                   </button>
                 </div>
+                <EditPhaseModal phase={p} /> */}
               </div>
             );
           })}
-        </div>
-      </div>
-      <div
-        className="modal fade"
-        id="editphase"
-        tabIndex="-1"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h1 className="modal-title fs-5" id="editphasebody">
-                Edit Phase
-              </h1>
-            </div>
-            <div className="modal-body">
-              <label className="form-label" htmlFor="Phase Title">
-                Phase Title
-              </label>
-              <input className="form-control" placeholder="Phase Title" />
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-primary"
-                data-bs-dismiss="modal"
-              >
-                Update
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                data-bs-dismiss="modal"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>

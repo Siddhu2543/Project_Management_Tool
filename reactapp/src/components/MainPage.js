@@ -7,8 +7,8 @@ import axios from "axios";
 
 const MainPage = () => {
   const [projects, setProjects] = useState([]);
-  const [todos, setTodos] = useState([1, 2, 3, 4]);
-
+  const [todos, setTodos] = useState([]);
+  const [tasks, setTasks] = useState([]);
   useEffect(() => {
     const token = JSON.parse(localStorage.getItem("USER"));
     const config = {
@@ -36,6 +36,20 @@ const MainPage = () => {
         setTodos(res.data.slice(0, 4));
       });
   }, []);
+  useEffect(() => {
+    const token = JSON.parse(localStorage.getItem("USER"));
+    const config = {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    };
+
+    axios
+      .get("https://localhost:7288/api/Employees/tasks", config)
+      .then((res) => {
+        setTasks(res.data);
+      });
+  }, []);
   return (
     <>
       <div className="row mb-3">
@@ -54,7 +68,7 @@ const MainPage = () => {
                     <div style={{ fontSize: "larger", fontWeight: "bolder" }}>
                       Total Tasks
                       <br />
-                      321
+                      {tasks?.length}
                     </div>
                   </div>
                 </div>
@@ -70,7 +84,7 @@ const MainPage = () => {
                     <div style={{ fontSize: "larger", fontWeight: "bolder" }}>
                       Completed Tasks
                       <br />
-                      210
+                      {tasks.filter((t) => t.isCompleted).length}
                     </div>
                   </div>
                 </div>
@@ -84,9 +98,9 @@ const MainPage = () => {
                       <i className="fa-solid fa-clock fa-2xl" />
                     </div>
                     <div style={{ fontSize: "larger", fontWeight: "bolder" }}>
-                      Progress Tasks
+                      In Progress Tasks
                       <br />
-                      111
+                      {tasks.filter((t) => !t.isCompleted).length}
                     </div>
                   </div>
                 </div>

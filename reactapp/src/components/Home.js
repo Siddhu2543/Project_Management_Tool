@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { UserContext } from "../App";
 import "../styles/mainpage.css";
 import { NavLink, Navigate, Outlet } from "react-router-dom";
@@ -6,11 +6,14 @@ import "../styles/home.css";
 
 const Home = () => {
   const { user, setUser } = useContext(UserContext);
+  const [tasks, setTasks] = useState([]);
 
   const handleLogout = () => {
     localStorage.removeItem("USER");
     setUser(JSON.parse(localStorage.getItem("USER")));
   };
+
+  useEffect(() => {}, []);
   return (
     <>
       {user ? (
@@ -213,10 +216,10 @@ const Home = () => {
                           height: "2px",
                         }}
                       />
-                      <p>
+                      <p style={{textAlign: "justify"}}>
                         A web application developed by Siddharth Vadgama, Umang
                         Varotariya and Faizan Vora. This project is created
-                        using MERN Stack Technology for SDP Lab.
+                        using ReactJS with ASP.NET Core Web API Technology for SDP Project.
                       </p>
                     </div>
 

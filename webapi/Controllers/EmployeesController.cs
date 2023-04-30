@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NuGet.Common;
@@ -39,6 +40,19 @@ namespace webapi.Controllers
           }
             return await _context.Employees.ToListAsync();
         }
+
+        [HttpGet("tasks")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<PTask>>> GetTasks()
+        {
+            var employee = await GetEmployeeFromToken();
+
+            var alltasks = await _context.PTasks.Include(p => p.Team).ThenInclude(t => t.Employees).ToListAsync();
+            var tasks = alltasks.Where(t => t.Team.Employees.Any(e => e.Id == employee.Id)).ToList();
+
+            return Ok(tasks);
+        }
+
 
         // GET: api/Employees/5
         [HttpGet("{id}")]

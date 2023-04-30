@@ -27,12 +27,12 @@ namespace webapi.Models
             modelBuilder.Entity<Employee>().HasMany(e => e.ConnectionsSelf).WithMany(e => e.Connections);
             modelBuilder.Entity<Project>().HasMany(p => p.Phases).WithOne(p => p.Project).HasForeignKey(p => p.ProjectId);
             modelBuilder.Entity<Project>().HasMany(p => p.Teams).WithOne(t => t.Project).HasForeignKey(t => t.ProjectId);
-            modelBuilder.Entity<Team>().HasMany(t => t.Employees).WithOne(e => e.Team).HasForeignKey(e => e.TeamId);
+            modelBuilder.Entity<Team>().HasMany(t => t.Employees).WithMany(e => e.Teams);
             modelBuilder.Entity<Project>().HasMany(p => p.Attachments).WithOne(a => a.Project).HasForeignKey(a => a.ProjectId);
             modelBuilder.Entity<Project>().HasMany(p => p.EmployeeSections).WithOne(e => e.Project).HasForeignKey(p => p.ProjectId);
             modelBuilder.Entity<Project>().HasOne(p => p.Chat).WithOne(c => c.Project).HasForeignKey<Chat>(c => c.ProjectId);
             modelBuilder.Entity<PTask>().HasOne(t => t.Phase).WithMany(p => p.PTasks).HasForeignKey(t => t.PhaseId).OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<PTask>().HasOne(t => t.Team).WithMany(t => t.PTasks).HasForeignKey(t => t.PhaseId).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<PTask>().HasOne(t => t.Team).WithMany(t => t.PTasks).HasForeignKey(t => t.TeamId).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Employee>().HasMany(e => e.Chats).WithMany(c => c.Employees);
             modelBuilder.Entity<Chat>().HasMany(c => c.Messages).WithOne(m => m.Chat).HasForeignKey(m => m.ChatId);
         }

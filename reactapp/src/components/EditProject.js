@@ -6,8 +6,8 @@ const EditProject = () => {
   const [title, setTitle] = useState("");
   const [priority, setpriority] = useState("");
   const [description, setdescription] = useState("");
-  const [startdate, setstartdate] = useState();
-  const [enddate, setenddate] = useState();
+  const [startdate, setstartdate] = useState("");
+  const [enddate, setenddate] = useState("");
   const [image, setimage] = useState("");
   const [chat, setchat] = useState("");
   const [project, setproject] = useState("");

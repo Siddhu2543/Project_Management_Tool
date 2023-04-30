@@ -21,14 +21,14 @@ namespace webapi.Controllers
         }
 
         // GET: api/Phases
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Phase>>> GetPhases()
+        [HttpGet("project/{id}")]
+        public async Task<ActionResult<IEnumerable<Phase>>> GetPhases(int id)
         {
           if (_context.Phases == null)
           {
               return NotFound();
           }
-            return await _context.Phases.ToListAsync();
+            return await _context.Phases.Where(p => p.ProjectId == id).OrderBy(p => p.Number).ToListAsync();
         }
 
         // GET: api/Phases/5

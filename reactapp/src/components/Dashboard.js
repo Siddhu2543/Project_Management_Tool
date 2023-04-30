@@ -1,46 +1,143 @@
 import { Chart } from "react-google-charts";
 import "../styles/dashboard.css";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import { useEffect, useState } from "react";
 
 const Dashboard = () => {
-  const taskData = [
-    ["Task Status", "Task Count"],
-    ["Not Started", 10],
-    ["In Progress", 7],
-    ["Completed", 12],
-    ["Lagging behind due date", 7],
-  ];
+  const [taskData, setTaskData] = useState([[]]);
+  const [phaseData, setPhaseData] = useState([[]]);
+  const [teamData, setTeamData] = useState([[]]);
+
   const taskOptions = {
     title: "Task Progress",
     is3D: true,
     backgroundColor: "#fbfbfb",
     colors: ["blue", "orange", "green", "red"],
   };
-
-  const teamData = [
-    ["Team", "Task Completed"],
-    ["Alpha", 6],
-    ["Beta", 4],
-    ["Gamma", 2],
-  ];
   const teamOptions = {
     title: "Team vs Task Completed",
     is3D: true,
     backgroundColor: "#fbfbfb",
   };
-
-  const phaseData = [
-    ["Phase", "Progress(%)"],
-    ["Client Req.", 100],
-    ["SRS Document", 100],
-    ["Modelling", 75],
-    ["Implementation", 50],
-    ["Testing", 25],
-    ["Deployment", 0],
-  ];
   const phaseOptions = {
     is3D: true,
     backgroundColor: "#fbfbfb",
   };
+
+  const { id } = useParams();
+  const [project, setproject] = useState("");
+  const [attachments, setAttachments] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [phases, setPhases] = useState([]);
+  const [teams, setTeams] = useState([]);
+
+  const getprojectbyid = async () => {
+    const token = JSON.parse(localStorage.getItem("USER"));
+    const config = {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    };
+    axios
+      .get(`https://localhost:7288/api/Projects/${id}`, config)
+      .then((res) => {
+        console.log(res.data);
+        setproject(res.data);
+      });
+  };
+  useEffect(() => {
+    getprojectbyid();
+  }, []);
+
+  useEffect(() => {
+    if (project) {
+      axios
+        .get(`https://localhost:7288/api/Phases/project/${project?.id}`)
+        .then((res) => {
+          setPhases(res.data);
+        });
+    }
+  }, [project]);
+
+  useEffect(() => {
+    if (project) {
+      axios
+        .get(`https://localhost:7288/api/PTasks/project/${project?.id}`)
+        .then((res) => {
+          setTasks(res.data);
+        });
+    }
+  }, [project]);
+
+  useEffect(() => {
+    if (project) {
+      axios
+        .get(`https://localhost:7288/api/Teams/project/${project?.id}`)
+        .then((res) => {
+          setTeams(res.data);
+        });
+    }
+  }, [project]);
+
+  const getAttachments = () => {
+    axios
+      .get(`https://localhost:7288/api/Attachments/project/${project?.id}`)
+      .then((res) => {
+        setAttachments(res.data);
+      });
+  };
+
+  useEffect(() => {
+    if (project) getAttachments();
+  }, [project]);
+
+  useEffect(() => {
+    if (phases && tasks && teams) {
+      const taskData = [
+        ["Task Status", "Task Count"],
+        [
+          "Not Started",
+          tasks.filter(
+            (task) =>
+              task.startDate.slice(0, 10) >
+              new Date().toISOString().slice(0, 10)
+          ).length,
+        ],
+        ["In Progress", tasks.filter((t) => !t.isCompleted).length],
+        ["Completed", tasks.filter((t) => t.isCompleted).length],
+        [
+          "Lagging behind",
+          tasks.filter(
+            (task) =>
+              task.endDate.slice(0, 10) < new Date().toISOString().slice(0, 10)
+          ).length,
+        ],
+      ];
+      setTaskData(taskData);
+      console.log(taskData);
+
+      var phaseData = [["Phase", "Progress(%)"]];
+      phases.forEach((p) => {
+        var td = tasks.filter((t) => t.phaseId == phaseData.id);
+        phaseData.push([
+          p.name,
+          td.filter((p) => p.isCompleted).length * td.length * 100,
+        ]);
+      });
+      setPhaseData(phaseData);
+
+      var teamdata = [["Team", "Task Completed"]];
+      teams.forEach((t) => {
+        teamdata.push([
+          t.name,
+          tasks.filter((task) => task.teamId === t.id && task.isCompleted)
+            .length,
+        ]);
+      });
+      setTeamData(teamdata);
+    }
+  }, [phases, tasks, teams]);
 
   return (
     <div
@@ -68,28 +165,32 @@ const Dashboard = () => {
                     Title:
                   </div>
                   <div className="col-xl-9 mb-2 text-wrap">
-                    Project Management Tool
+                    {project?.title}
                   </div>
                   <div className="col-xl-3 mb-2 text-muted text-nowrap">
                     Description:
                   </div>
                   <div className="col-xl-9 mb-2 text-wrap">
-                    This is a Project Management Tool Software to overcome
-                    problems occuring during project implementation and with
-                    employee problems.
+                    {project?.description}
                   </div>
                   <div className="col-xl-3 mb-2 text-muted text-nowrap">
                     Type:
                   </div>
-                  <div className="col-xl-9 mb-2 text-wrap">High Priority</div>
+                  <div className="col-xl-9 mb-2 text-wrap">
+                    {project?.priority}
+                  </div>
                   <div className="col-xl-3 mb-2 text-muted text-nowrap">
                     Start Date:
                   </div>
-                  <div className="col-xl-9 mb-2 text-wrap">04 March, 2023</div>
+                  <div className="col-xl-9 mb-2 text-wrap">
+                    {project?.startDate?.slice(0, 10)}
+                  </div>
                   <div className="col-xl-3 mb-2 text-muted text-nowrap">
                     Due Date:
                   </div>
-                  <div className="col-xl-9 text-wrap">25 April, 2023</div>
+                  <div className="col-xl-9 text-wrap">
+                    {project?.endDate?.slice(0, 10)}
+                  </div>
                 </div>
               </div>
             </div>
@@ -175,30 +276,16 @@ const Dashboard = () => {
                   <div className="col-xl-8 mb-2 text-wrap">File Name</div>
                   <div className="col-xl-4 mb-2 text-nowrap">Date Added</div>
                   <hr className="mb-3" />
-                  <div className="col-xl-8 mb-2 text-wrap text-muted">
-                    SRS Document
-                  </div>
-                  <div className="col-xl-4 mb-2 text-nowrap">
-                    03 March, 2023
-                  </div>
-                  <div className="col-xl-8 mb-2 text-wrap text-muted">
-                    Class Diagram
-                  </div>
-                  <div className="col-xl-4 mb-2 text-nowrap">
-                    04 March, 2023
-                  </div>
-                  <div className="col-xl-8 mb-2 text-wrap text-muted">
-                    Task Report (by, Alpha Team)
-                  </div>
-                  <div className="col-xl-4 mb-2 text-nowrap">
-                    05 March, 2023
-                  </div>
-                  <div className="col-xl-8 mb-2 text-wrap text-muted">
-                    Task Report (by, Beta Team)
-                  </div>
-                  <div className="col-xl-4 mb-2 text-nowrap">
-                    05 March, 2023
-                  </div>
+                  {attachments?.map((a, i) => (
+                    <span key={i}>
+                      <div className="col-xl-8 mb-2 text-wrap text-muted">
+                        {a?.fileName}
+                      </div>
+                      <div className="col-xl-4 mb-2 text-nowrap">
+                        {a?.addedDate.slice(0, 10)}
+                      </div>
+                    </span>
+                  ))}
                 </div>
               </div>
             </div>
